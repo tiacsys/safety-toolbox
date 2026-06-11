@@ -30,12 +30,34 @@ static void reset_to(uint32_t a, uint16_t b, uint8_t c)
 	zassert_ok(SAFE_WRITE(&sp, &v));
 }
 
+/**
+ * @brief Init seals and verification passes
+ *
+ * SAFE_INIT seals the freshly written payload; SAFE_VERIFY on the untouched
+ * container returns 0.
+ *
+ * @testid{TC_SAFE_DATA_INIT_AND_VERIFY}
+ * @reqref{SD-REQ-001}
+ * @reqref{SD-REQ-003}
+ * @active
+ */
 ZTEST(safe_data, test_init_and_verify)
 {
 	reset_to(1, 2, 3);
 	zassert_ok(SAFE_VERIFY(&sp), "freshly sealed data must verify");
 }
 
+/**
+ * @brief Read returns the sealed value
+ *
+ * A value written through SAFE_WRITE is returned bit-exact by a validated
+ * SAFE_READ.
+ *
+ * @testid{TC_SAFE_DATA_READ_ROUNDTRIP}
+ * @reqref{SD-REQ-005}
+ * @reqref{SD-REQ-006}
+ * @active
+ */
 ZTEST(safe_data, test_read_roundtrip)
 {
 	struct payload out;
@@ -47,6 +69,16 @@ ZTEST(safe_data, test_read_roundtrip)
 	zassert_equal(out.c, 0x42);
 }
 
+/**
+ * @brief Write replaces the payload and reseals
+ *
+ * After SAFE_WRITE the container verifies clean and a subsequent read returns
+ * the new value: the tag can never go stale across a write.
+ *
+ * @testid{TC_SAFE_DATA_WRITE_RESEALS}
+ * @reqref{SD-REQ-006}
+ * @active
+ */
 ZTEST(safe_data, test_write_reseals)
 {
 	struct payload v = { .a = 7, .b = 8, .c = 9 };
@@ -76,6 +108,16 @@ static int mut_abort(void *payload, void *user)
 	return -ERANGE;
 }
 
+/**
+ * @brief Update commits a mutator transaction
+ *
+ * SAFE_UPDATE runs the mutator under the lock and reseals on a zero return;
+ * the committed value is visible to the next read.
+ *
+ * @testid{TC_SAFE_DATA_UPDATE_COMMITS}
+ * @reqref{SD-REQ-007}
+ * @active
+ */
 ZTEST(safe_data, test_update_commits)
 {
 	uint32_t delta = 5;
@@ -87,6 +129,17 @@ ZTEST(safe_data, test_update_commits)
 	zassert_equal(out.a, 15);
 }
 
+/**
+ * @brief Aborted update leaves a consistent container
+ *
+ * A mutator returning a negative errno aborts the transaction. With the
+ * redundant shadow the payload is rolled back to the pre-update value; without
+ * it the partial write is detectable via the (not resealed) tag.
+ *
+ * @testid{TC_SAFE_DATA_UPDATE_ABORT_KEEPS_INTEGRITY}
+ * @reqref{SD-REQ-007}
+ * @active
+ */
 ZTEST(safe_data, test_update_abort_keeps_integrity)
 {
 	int ret;
@@ -110,6 +163,16 @@ ZTEST(safe_data, test_update_abort_keeps_integrity)
 	}
 }
 
+/**
+ * @brief SAFE_SECTION reseals at scope exit
+ *
+ * Modifications made through the typed pointer inside a SAFE_SECTION block are
+ * sealed automatically on normal scope exit and visible to the next read.
+ *
+ * @testid{TC_SAFE_DATA_SECTION_SCOPE}
+ * @reqref{SD-REQ-021}
+ * @active
+ */
 ZTEST(safe_data, test_section_scope)
 {
 #if defined(CONFIG_SAFE_DATA_GNU_EXTENSIONS)
@@ -129,6 +192,18 @@ ZTEST(safe_data, test_section_scope)
 #endif
 }
 
+/**
+ * @brief Payload corruption detected; verification is pure
+ *
+ * Out-of-band payload corruption is detected by SAFE_VERIFY without modifying
+ * the payload (pure check). With the shadow copy the subsequent locked read
+ * repairs and reseals; without it the fault is unrecoverable.
+ *
+ * @testid{TC_SAFE_DATA_DETECTS_CORRUPTION}
+ * @reqref{SD-REQ-003}
+ * @reqref{SD-REQ-009}
+ * @active
+ */
 ZTEST(safe_data, test_detects_corruption)
 {
 	reset_to(100, 200, 30);
@@ -155,6 +230,17 @@ ZTEST(safe_data, test_detects_corruption)
 	}
 }
 
+/**
+ * @brief verify_repair restores the payload in place
+ *
+ * safe_data_verify_repair() (lock-held contract) restores a corrupted payload
+ * from the shadow copy in place; the container verifies clean afterwards.
+ *
+ * @testid{TC_SAFE_DATA_VERIFY_REPAIR_FIXES_IN_PLACE}
+ * @reqref{SD-REQ-004}
+ * @reqref{SD-REQ-009}
+ * @active
+ */
 ZTEST(safe_data, test_verify_repair_fixes_in_place)
 {
 	if (!IS_ENABLED(CONFIG_SAFE_DATA_REDUNDANT)) {
@@ -175,6 +261,17 @@ ZTEST(safe_data, test_verify_repair_fixes_in_place)
 	zassert_ok(SAFE_VERIFY(&sp));
 }
 
+/**
+ * @brief Unchecked commit reseals an external modification
+ *
+ * SAFE_COMMIT re-tags the current contents after an audited direct
+ * modification of the storage (only available with
+ * CONFIG_SAFE_DATA_ALLOW_UNCHECKED_COMMIT).
+ *
+ * @testid{TC_SAFE_DATA_COMMIT_RESEALS_EXTERNAL_WRITE}
+ * @reqref{SD-REQ-022}
+ * @active
+ */
 ZTEST(safe_data, test_commit_reseals_external_write)
 {
 #if !defined(CONFIG_SAFE_DATA_ALLOW_UNCHECKED_COMMIT)
@@ -197,6 +294,16 @@ ZTEST(safe_data, test_commit_reseals_external_write)
 #endif /* CONFIG_SAFE_DATA_ALLOW_UNCHECKED_COMMIT */
 }
 
+/**
+ * @brief Stale tag with consistent data recovers
+ *
+ * When only the stored tag is corrupted (payload and shadow agree), the fault
+ * is recoverable; a locked read makes the reseal durable.
+ *
+ * @testid{TC_SAFE_DATA_STALE_TAG_RECOVERS}
+ * @reqref{SD-REQ-009}
+ * @active
+ */
 ZTEST(safe_data, test_stale_tag_recovers)
 {
 	struct payload out;
@@ -220,6 +327,16 @@ ZTEST(safe_data, test_stale_tag_recovers)
 	zassert_ok(SAFE_VERIFY(&sp), "tag must be resealed after recovery");
 }
 
+/**
+ * @brief Double fault is unrecoverable
+ *
+ * Inconsistent corruption of payload AND shadow leaves no copy to vouch for
+ * the data: verification reports -EILSEQ.
+ *
+ * @testid{TC_SAFE_DATA_DOUBLE_FAULT_UNRECOVERABLE}
+ * @reqref{SD-REQ-010}
+ * @active
+ */
 ZTEST(safe_data, test_double_fault_unrecoverable)
 {
 	/* The shadow field only exists when redundancy is compiled in, so this
@@ -241,6 +358,16 @@ ZTEST(safe_data, test_double_fault_unrecoverable)
 #endif
 }
 
+/**
+ * @brief NULL and zero-size arguments are rejected
+ *
+ * Every API entry point rejects missing required pointers and zero-length
+ * payloads with -EINVAL (a NULL lock is legal: locking is optional).
+ *
+ * @testid{TC_SAFE_DATA_NULL_ARGS}
+ * @reqref{SD-REQ-002}
+ * @active
+ */
 ZTEST(safe_data, test_null_args)
 {
 	uint32_t crc = 0;
@@ -341,6 +468,17 @@ static void cc_consumer(void *a, void *b, void *c)
 	}
 }
 
+/**
+ * @brief Concurrent access never yields torn snapshots
+ *
+ * A producer mutating dependent fields under SAFE_UPDATE and a consumer using
+ * SAFE_READ run concurrently for many iterations; the consumer never observes
+ * a snapshot violating the payload invariant.
+ *
+ * @testid{TC_SAFE_DATA_CONCURRENT_ACCESS_IS_SERIALISED}
+ * @reqref{SD-REQ-016}
+ * @active
+ */
 ZTEST(safe_data, test_concurrent_access_is_serialised)
 {
 	struct cc_payload init = {0};
@@ -370,6 +508,16 @@ ZTEST(safe_data, test_concurrent_access_is_serialised)
  * enforcement, bounded locking.
  * ----------------------------------------------------------------------- */
 
+/**
+ * @brief Self-test reports a healthy mechanism
+ *
+ * safe_data_selftest() passes on a healthy system: CRC known-answer test plus
+ * a seal/corrupt/detect(/recover) round trip on a scratch container.
+ *
+ * @testid{TC_SAFE_DATA_SELFTEST}
+ * @reqref{SD-REQ-017}
+ * @active
+ */
 ZTEST(safe_data, test_selftest)
 {
 #if defined(CONFIG_SAFE_DATA_SELFTEST)
@@ -379,6 +527,16 @@ ZTEST(safe_data, test_selftest)
 #endif
 }
 
+/**
+ * @brief Statistics count every integrity event
+ *
+ * Recovered-payload, recovered-tag and unrecoverable detections each increment
+ * their dedicated counter exactly once per detection.
+ *
+ * @testid{TC_SAFE_DATA_STATS_COUNT_EVENTS}
+ * @reqref{SD-REQ-012}
+ * @active
+ */
 ZTEST(safe_data, test_stats_count_events)
 {
 #if defined(CONFIG_SAFE_DATA_STATS)
@@ -434,6 +592,19 @@ static void fault_event_cb_other(const struct safe_data_fault_info *info)
 	ARG_UNUSED(info);
 }
 
+/**
+ * @brief Registered handler receives all event kinds
+ *
+ * safe_data_fault_handler_register() accepts one callback (second registration
+ * is rejected with -EALREADY, re-registration is idempotent) and the callback
+ * receives recovery events as well as unrecoverable faults with a populated
+ * event descriptor.
+ *
+ * @testid{TC_SAFE_DATA_FAULT_HANDLER_EVENTS}
+ * @reqref{SD-REQ-013}
+ * @reqref{SD-REQ-011}
+ * @active
+ */
 ZTEST(safe_data, test_fault_handler_events)
 {
 	atomic_clear(&cb_count);
@@ -479,6 +650,17 @@ static int mut_positive(void *payload, void *user)
 	return 7; /* contract violation: positive return */
 }
 
+/**
+ * @brief Positive mutator return is clamped and aborted
+ *
+ * A mutator returning a positive value violates the contract: SAFE_UPDATE
+ * returns -EINVAL, the transaction aborts (rollback with shadow), and the
+ * violation is counted.
+ *
+ * @testid{TC_SAFE_DATA_UPDATE_CLAMPS_POSITIVE_MUTATOR_RETURN}
+ * @reqref{SD-REQ-008}
+ * @active
+ */
 ZTEST(safe_data, test_update_clamps_positive_mutator_return)
 {
 	reset_to(10, 0, 0);
@@ -505,6 +687,16 @@ ZTEST(safe_data, test_update_clamps_positive_mutator_return)
 #endif
 }
 
+/**
+ * @brief Write observes corruption before overwriting
+ *
+ * With CONFIG_SAFE_DATA_WRITE_CHECKS_OLD a write over corrupted contents still
+ * succeeds, but the destroyed evidence is counted in the statistics first.
+ *
+ * @testid{TC_SAFE_DATA_WRITE_OBSERVES_OVERWRITTEN_CORRUPTION}
+ * @reqref{SD-REQ-018}
+ * @active
+ */
 ZTEST(safe_data, test_write_observes_overwritten_corruption)
 {
 #if defined(CONFIG_SAFE_DATA_WRITE_CHECKS_OLD) && defined(CONFIG_SAFE_DATA_STATS)
@@ -547,6 +739,17 @@ static void holder_fn(void *a, void *b, void *c)
 }
 #endif
 
+/**
+ * @brief Blocked access fails within the lock bound
+ *
+ * While another thread holds the container lock, an access fails with
+ * -ETIMEDOUT within CONFIG_SAFE_DATA_LOCK_TIMEOUT_MS and the timeout is
+ * counted; the container is usable again after the holder releases.
+ *
+ * @testid{TC_SAFE_DATA_LOCK_TIMEOUT_IS_BOUNDED_AND_REPORTED}
+ * @reqref{SD-REQ-014}
+ * @active
+ */
 ZTEST(safe_data, test_lock_timeout_is_bounded_and_reported)
 {
 #if CONFIG_SAFE_DATA_LOCK_TIMEOUT_MS > 0 && defined(CONFIG_SAFE_DATA_LOCKING)
@@ -580,4 +783,14 @@ ZTEST(safe_data, test_lock_timeout_is_bounded_and_reported)
 #endif
 }
 
+/**
+ * @defgroup safe_data_module Safe Data Test Application
+ * @ingroup safe_data_tests
+ * @brief Unit-test application for the Safe Data API (tests/safe_data).
+ */
+
+/**
+ * @addtogroup safe_data
+ * @ingroup safe_data_module
+ */
 ZTEST_SUITE(safe_data, NULL, NULL, NULL, NULL, NULL);

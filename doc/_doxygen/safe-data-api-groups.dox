@@ -1,0 +1,15 @@
+/**
+
+@defgroup safe_data_apis Safe Data API
+@brief CRC-protected (optionally redundant) data containers with integrity guaranteed by construction.
+@details A safe container bundles a user payload with an integrity tag (CRC),
+         an optional inverted shadow copy, and a per-container mutex. All
+         access goes through operations that hold the lock across the whole
+         read-modify-write and reseal the tag automatically, so a stale tag or
+         a torn update cannot happen by construction.
+@since 0.1
+@version 0.2
+@{
+@}
+
+*/

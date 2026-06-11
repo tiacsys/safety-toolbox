@@ -1,0 +1,23 @@
+Safe Data API — Test Report
+############################
+
+Test outcomes for the Safe Data API, derived from the twister results
+(``twister_report.xml``). Every executed test case becomes a sphinx-needs
+``test_result`` item linked ``result_of`` its test case in the *Test
+Specification* and ``covers`` the requirements that test case verifies.
+
+A ``skipped`` outcome means the test's mechanism is not part of that
+scenario's configuration (e.g. recovery tests in the ``plain`` scenario, the
+lock-timeout test outside the ``timeout`` scenario) — see the scenario table
+in the test specification.
+
+Test run
+========
+
+.. twisterinfo:: twister.json
+
+Results
+=======
+
+.. testreport:: twister_report.xml
+   :module: safe_data.api

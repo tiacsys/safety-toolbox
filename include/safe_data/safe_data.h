@@ -62,6 +62,18 @@ extern "C" {
 #endif
 #endif /* !CONFIG_SAFE_DATA */
 
+/**
+ * @defgroup safe_data_core_apis Type-Erased Core
+ * @ingroup safe_data_apis
+ * @brief Type-erased core operations; all integrity logic in one audited place.
+ *
+ * Application code should prefer the typed container layer
+ * (@ref safe_data_container_apis) - the macros there only derive
+ * `(&payload, sizeof(payload), &crc, &lock, shadow)` from a typed container
+ * and forward to these functions.
+ * @{
+ */
+
 /** @brief Return code for a fault that the redundant shadow copy covers.
  *
  * From safe_data_verify() (pure) it means the fault is *recoverable*: the
@@ -85,6 +97,19 @@ extern "C" {
  */
 typedef int (*safe_data_mutator_t)(void *payload, void *user);
 
+/** @} */ /* safe_data_core_apis */
+
+/**
+ * @defgroup safe_data_diag_apis Diagnostics and Fault Handling
+ * @ingroup safe_data_apis
+ * @brief Integrity-event reporting: fault handler, statistics, self-test.
+ *
+ * The observability interface a health monitor hooks into. Every integrity
+ * event (recovery, unrecoverable corruption, lock timeout, overwritten
+ * contents, clamped mutator return) is reported exactly once per detection.
+ * @{
+ */
+
 /** @brief Kind of integrity event reported to the fault handler / statistics. */
 enum safe_data_fault_kind {
 	/** Corruption detected, no redundant copy could vouch for the data. */
@@ -103,6 +128,7 @@ enum safe_data_fault_kind {
 
 /** @brief Event descriptor passed to the registered fault handler. */
 struct safe_data_fault_info {
+	/** Kind of integrity event being reported. */
 	enum safe_data_fault_kind kind;
 	/** Affected payload, or NULL when not applicable (e.g. lock timeout). */
 	const void *payload;
@@ -116,6 +142,9 @@ struct safe_data_fault_info {
  * May be invoked while the affected container's lock is held: the handler must
  * not block and must not access any safe container (AoU: record the event,
  * set a flag/semaphore for a monitor thread, or drive the safe state).
+ *
+ * @param info Event descriptor (kind, affected payload, size). Only valid for
+ *             the duration of the call; copy what you need.
  */
 typedef void (*safe_data_fault_cb_t)(const struct safe_data_fault_info *info);
 
@@ -140,6 +169,9 @@ int safe_data_fault_handler_register(safe_data_fault_cb_t cb);
  * (the registered callback takes precedence). The default implementation logs
  * and returns. The same execution-context constraints apply as for
  * safe_data_fault_cb_t.
+ *
+ * @param payload Pointer to the payload whose integrity check failed.
+ * @param len     Payload size in bytes.
  */
 void safe_data_fault_handler(const void *payload, size_t len);
 
@@ -161,6 +193,8 @@ struct safe_data_stats {
 
 /**
  * @brief Snapshot the global statistics.
+ *
+ * @param out Destination for the counter snapshot.
  * @return 0 on success, -EINVAL on NULL, -ENOTSUP without CONFIG_SAFE_DATA_STATS.
  */
 int safe_data_stats_get(struct safe_data_stats *out);
@@ -187,12 +221,19 @@ int safe_data_selftest(void);
 int safe_data_selftest_result(void);
 #endif /* CONFIG_SAFE_DATA_SELFTEST */
 
+/** @} */ /* safe_data_diag_apis */
+
 /* ------------------------------------------------------------------------- *
  * Type-erased core API. Prefer the typed macros below in application code.
  * All functions return 0 on success or a negative errno; NULL pointers for
  * required arguments yield -EINVAL. The @p lock argument is optional: pass NULL
  * (as the typed macros do when CONFIG_SAFE_DATA_LOCKING=n) to skip locking.
  * ------------------------------------------------------------------------- */
+
+/**
+ * @addtogroup safe_data_core_apis
+ * @{
+ */
 
 /**
  * @brief Initialise the lock and seal the current payload contents.
@@ -216,6 +257,10 @@ int safe_data_init(struct k_mutex *lock, void *payload, size_t len,
  *        (a transient mismatch may then be reported - callers needing
  *        atomicity should use the higher-level helpers).
  *
+ * @param payload Payload buffer to check.
+ * @param len     Payload size in bytes (> 0).
+ * @param crc     Stored integrity tag to check against.
+ * @param shadow  Redundant shadow buffer of @p len bytes, or NULL if disabled.
  * @return 0 if valid, SAFE_DATA_RECOVERED (-EAGAIN) if corrupt but recoverable
  *         from the shadow copy (payload untouched), -EILSEQ if corrupt and
  *         unrecoverable, -EINVAL on bad args.
@@ -232,6 +277,10 @@ int safe_data_verify(const void *payload, size_t len, uint32_t crc,
  * (read/update/SAFE_SECTION) call this internally; after SAFE_DATA_RECOVERED
  * the caller reseals the stored tag to make the repair durable.
  *
+ * @param payload Payload buffer to check and, if recoverable, repair in place.
+ * @param len     Payload size in bytes (> 0).
+ * @param crc     Stored integrity tag to check against.
+ * @param shadow  Redundant shadow buffer of @p len bytes, or NULL if disabled.
  * @return 0 if valid, SAFE_DATA_RECOVERED (-EAGAIN) if the payload was repaired
  *         from the shadow copy (reseal required), -EILSEQ if corrupt and
  *         unrecoverable, -EINVAL on bad args.
@@ -241,8 +290,18 @@ int safe_data_verify_repair(void *payload, size_t len, uint32_t crc,
 
 /**
  * @brief Verify under lock and copy the payload out to @p out.
- * @return 0 on success (incl. recovered), -EILSEQ if unrecoverable, -EINVAL,
- *         -ETIMEDOUT if the lock bound expired.
+ *
+ * A recoverable fault is repaired and resealed before copying, so a 0 return
+ * always means @p out holds a valid snapshot.
+ *
+ * @param lock    Container mutex, or NULL to skip locking.
+ * @param payload Payload buffer.
+ * @param len     Payload size in bytes (> 0).
+ * @param crc     Integrity tag storage (resealed after a repair).
+ * @param shadow  Redundant shadow buffer of @p len bytes, or NULL if disabled.
+ * @param out     Destination buffer of @p len bytes for the validated copy.
+ * @return 0 on success (incl. recovered), -EILSEQ if unrecoverable, -EINVAL on
+ *         bad args, -ETIMEDOUT if the lock bound expired.
  */
 int safe_data_read(struct k_mutex *lock, void *payload, size_t len,
 		   uint32_t *crc, void *shadow, void *out);
@@ -254,6 +313,12 @@ int safe_data_read(struct k_mutex *lock, void *payload, size_t len,
  * first; a detected corruption is reported (stats + fault callback, kind
  * OVERWRITTEN) but does not change the outcome of the write.
  *
+ * @param lock    Container mutex, or NULL to skip locking.
+ * @param payload Payload buffer (overwritten).
+ * @param len     Payload size in bytes (> 0).
+ * @param crc     Integrity tag storage (resealed).
+ * @param shadow  Redundant shadow buffer of @p len bytes, or NULL if disabled.
+ * @param in      Source buffer of @p len bytes to copy into the payload.
  * @return 0 on success, -EINVAL on bad args, -ETIMEDOUT if the lock bound
  *         expired.
  */
@@ -266,6 +331,15 @@ int safe_data_write(struct k_mutex *lock, void *payload, size_t len,
  * This is the correct "checkout": the lock is held for the entire transaction
  * and the integrity tag is resealed automatically, so it can never go stale.
  *
+ * @param lock    Container mutex, or NULL to skip locking.
+ * @param payload Payload buffer, verified before and resealed after @p fn.
+ * @param len     Payload size in bytes (> 0).
+ * @param crc     Integrity tag storage (resealed on commit).
+ * @param shadow  Redundant shadow buffer of @p len bytes, or NULL if disabled
+ *                (without it an aborting mutator must not have modified the
+ *                payload - there is no rollback buffer).
+ * @param fn      Mutator invoked with the lock held and the payload verified.
+ * @param user    Opaque context forwarded to @p fn.
  * @return 0 on success, the mutator's negative return value if it aborts
  *         (a positive mutator return is clamped to -EINVAL), -EILSEQ if the
  *         pre-check fails unrecoverably, -EINVAL on bad args, -ETIMEDOUT if
@@ -283,10 +357,21 @@ int safe_data_update(struct k_mutex *lock, void *payload, size_t len,
  * @warning Re-tags the current memory contents with NO verification - this can
  *          seal corrupted data. Only available with
  *          CONFIG_SAFE_DATA_ALLOW_UNCHECKED_COMMIT (off at the Strict level).
+ *
+ * @param lock    Container mutex, or NULL to skip locking.
+ * @param payload Payload buffer whose current contents are sealed as-is.
+ * @param len     Payload size in bytes (> 0).
+ * @param crc     Integrity tag storage (recomputed).
+ * @param shadow  Redundant shadow buffer of @p len bytes (refreshed), or NULL
+ *                if disabled.
+ * @return 0 on success, -EINVAL on bad args, -ETIMEDOUT if the lock bound
+ *         expired.
  */
 int safe_data_commit(struct k_mutex *lock, void *payload, size_t len,
 		     uint32_t *crc, void *shadow);
 #endif /* CONFIG_SAFE_DATA_ALLOW_UNCHECKED_COMMIT */
+
+/** @} */ /* safe_data_core_apis */
 
 /* Implementation details shared with the SAFE_SECTION macro. */
 void z_safe_data_seal(void *payload, size_t len, uint32_t *crc, void *shadow);
@@ -332,18 +417,16 @@ static inline void z_safe_unlock(struct k_mutex *lock)
  * ------------------------------------------------------------------------- */
 
 /**
- * @brief Declare a CRC-protected container type wrapping @p _payload_type.
+ * @defgroup safe_data_container_apis Containers and Typed Access
+ * @ingroup safe_data_apis
+ * @brief Typed container definition and access macros - the primary API.
  *
- * Generates a struct with an optional mutex (only when CONFIG_SAFE_DATA_LOCKING,
- * the default), an integrity tag, an optional redundant shadow copy (only when
- * CONFIG_SAFE_DATA_REDUNDANT), and the user payload.
- *
- * Usage:
- * @code
- *   SAFE_CONTAINER_DEFINE(safe_config, struct system_config);
- *   static struct safe_config cfg;
- * @endcode
+ * Declare a container type with SAFE_CONTAINER_DEFINE(), then access it
+ * exclusively through the SAFE_* operations; they derive the type-erased
+ * arguments at compile time and forward to @ref safe_data_core_apis.
+ * @{
  */
+
 /* Detection strength of a CRC collapses once the payload outgrows it. These
  * bounds keep the configured tag inside its useful Hamming-distance range; use
  * SAFE_CONTAINER_DEFINE_UNCHECKED only with a documented deviation.
@@ -363,6 +446,25 @@ static inline void z_safe_unlock(struct k_mutex *lock)
 			   (uint8_t _shadow[sizeof(_payload_type)];))          \
 		_payload_type payload;
 
+/**
+ * @brief Declare a CRC-protected container type wrapping @p _payload_type.
+ *
+ * Generates a struct with an optional mutex (only when CONFIG_SAFE_DATA_LOCKING,
+ * the default), an integrity tag, an optional redundant shadow copy (only when
+ * CONFIG_SAFE_DATA_REDUNDANT), and the user payload.
+ *
+ * Rejects zero-size payloads and payloads exceeding the size bound of the
+ * configured tag (CRC-8: 16 bytes, CRC-16: 256 bytes) at compile time.
+ *
+ * Usage:
+ * @code
+ *   SAFE_CONTAINER_DEFINE(safe_config, struct system_config);
+ *   static struct safe_config cfg;
+ * @endcode
+ *
+ * @param _container_name Name of the generated struct type.
+ * @param _payload_type   Complete type of the protected payload.
+ */
 #define SAFE_CONTAINER_DEFINE(_container_name, _payload_type)                  \
 	struct _container_name {                                               \
 		BUILD_ASSERT(sizeof(_payload_type) > 0,                        \
@@ -373,8 +475,12 @@ static inline void z_safe_unlock(struct k_mutex *lock)
 		Z_SAFE_CONTAINER_BODY(_payload_type)                           \
 	}
 
-/** @brief As SAFE_CONTAINER_DEFINE but without the tag-strength size bound.
- *         For documented deviations only.
+/**
+ * @brief As SAFE_CONTAINER_DEFINE but without the tag-strength size bound.
+ *        For documented deviations only.
+ *
+ * @param _container_name Name of the generated struct type.
+ * @param _payload_type   Complete type of the protected payload.
  */
 #define SAFE_CONTAINER_DEFINE_UNCHECKED(_container_name, _payload_type)        \
 	struct _container_name {                                               \
@@ -393,35 +499,62 @@ static inline void z_safe_unlock(struct k_mutex *lock)
 #define _SAFE_LOCK(_c)                                                         \
 	COND_CODE_1(CONFIG_SAFE_DATA_LOCKING, (&(_c)->_lock), (NULL))
 
-/** @brief Initialise and seal a container. @see safe_data_init */
+/**
+ * @brief Initialise and seal a container. @see safe_data_init
+ * @param _c Pointer to a container declared with SAFE_CONTAINER_DEFINE().
+ * @return As safe_data_init().
+ */
 #define SAFE_INIT(_c)                                                          \
 	safe_data_init(_SAFE_LOCK(_c), &(_c)->payload, sizeof((_c)->payload),  \
 		       &(_c)->_crc, _SAFE_SHADOW(_c))
 
-/** @brief Verify integrity only (pure, never modifies the payload).
- *  @see safe_data_verify
+/**
+ * @brief Verify integrity only (pure, never modifies the payload).
+ * @see safe_data_verify
+ * @param _c Pointer to a container declared with SAFE_CONTAINER_DEFINE().
+ * @return As safe_data_verify().
  */
 #define SAFE_VERIFY(_c)                                                        \
 	safe_data_verify(&(_c)->payload, sizeof((_c)->payload), (_c)->_crc,    \
 			 _SAFE_SHADOW(_c))
 
-/** @brief Validated copy out into @p _out_ptr. @see safe_data_read */
+/**
+ * @brief Validated copy out into @p _out_ptr. @see safe_data_read
+ * @param _c      Pointer to a container declared with SAFE_CONTAINER_DEFINE().
+ * @param _out_ptr Destination buffer of at least sizeof(payload) bytes.
+ * @return As safe_data_read().
+ */
 #define SAFE_READ(_c, _out_ptr)                                                \
 	safe_data_read(_SAFE_LOCK(_c), &(_c)->payload, sizeof((_c)->payload),  \
 		       &(_c)->_crc, _SAFE_SHADOW(_c), (_out_ptr))
 
-/** @brief Validated copy in from @p _in_ptr + reseal. @see safe_data_write */
+/**
+ * @brief Validated copy in from @p _in_ptr + reseal. @see safe_data_write
+ * @param _c     Pointer to a container declared with SAFE_CONTAINER_DEFINE().
+ * @param _in_ptr Source buffer of at least sizeof(payload) bytes.
+ * @return As safe_data_write().
+ */
 #define SAFE_WRITE(_c, _in_ptr)                                                \
 	safe_data_write(_SAFE_LOCK(_c), &(_c)->payload, sizeof((_c)->payload), \
 			&(_c)->_crc, _SAFE_SHADOW(_c), (_in_ptr))
 
-/** @brief Atomic read-modify-write via callback. @see safe_data_update */
+/**
+ * @brief Atomic read-modify-write via callback. @see safe_data_update
+ * @param _c    Pointer to a container declared with SAFE_CONTAINER_DEFINE().
+ * @param _fn   Mutator of type safe_data_mutator_t.
+ * @param _user Opaque context forwarded to @p _fn.
+ * @return As safe_data_update().
+ */
 #define SAFE_UPDATE(_c, _fn, _user)                                            \
 	safe_data_update(_SAFE_LOCK(_c), &(_c)->payload, sizeof((_c)->payload),\
 			 &(_c)->_crc, _SAFE_SHADOW(_c), (_fn), (_user))
 
 #if defined(CONFIG_SAFE_DATA_ALLOW_UNCHECKED_COMMIT) || defined(__DOXYGEN__)
-/** @brief Reseal after an explicit external modification. @see safe_data_commit */
+/**
+ * @brief Reseal after an explicit external modification. @see safe_data_commit
+ * @param _c Pointer to a container declared with SAFE_CONTAINER_DEFINE().
+ * @return As safe_data_commit().
+ */
 #define SAFE_COMMIT(_c)                                                        \
 	safe_data_commit(_SAFE_LOCK(_c), &(_c)->payload,                       \
 			 sizeof((_c)->payload), &(_c)->_crc, _SAFE_SHADOW(_c))
@@ -457,6 +590,9 @@ static inline void z_safe_unlock(struct k_mutex *lock)
  *
  * The block is also skipped (and the lock-timeout event reported) when the
  * container lock cannot be acquired within CONFIG_SAFE_DATA_LOCK_TIMEOUT_MS.
+ *
+ * @param _c    Pointer to a container declared with SAFE_CONTAINER_DEFINE().
+ * @param _pvar Name of the typed payload-pointer variable scoped to the block.
  */
 #if defined(CONFIG_SAFE_DATA_GNU_EXTENSIONS) || defined(__DOXYGEN__)
 #define SAFE_SECTION(_c, _pvar)                                                \
@@ -477,6 +613,8 @@ static inline void z_safe_unlock(struct k_mutex *lock)
 		for (__typeof__((_c)->payload) *_pvar = &(_c)->payload;        \
 		     _pvar != NULL; _pvar = NULL)
 #endif /* CONFIG_SAFE_DATA_GNU_EXTENSIONS */
+
+/** @} */ /* safe_data_container_apis */
 
 #ifdef __cplusplus
 }

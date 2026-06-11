@@ -1,0 +1,8 @@
+/**
+@defgroup all_tests Safe Data API Tests
+@{
+
+  @defgroup safe_data_tests Safe Data Test Suites
+
+@}
+*/

@@ -1,0 +1,58 @@
+# Doxygen template — Safe Data API documentation (HTML).
+# Configured by doc/CMakeLists.txt (add_doxygen_target): @DOC_BASE@ and
+# @DOXY_OUT@ are substituted and the rendered doxyfile lands in the build dir.
+
+PROJECT_NAME           = "Safe Data API"
+PROJECT_BRIEF          = "CRC-protected (optionally redundant) data containers for Zephyr"
+PROJECT_NUMBER         = 0.2
+
+OUTPUT_DIRECTORY       = @DOXY_OUT@
+CREATE_SUBDIRS         = NO
+
+INPUT                  = @DOC_BASE@/_doxygen/safe-data-api-groups.dox \
+                         @DOC_BASE@/../include/safe_data/safe_data.h \
+                         @DOC_BASE@/../src/safe_data.c \
+                         @DOC_BASE@/../README.md
+USE_MDFILE_AS_MAINPAGE = @DOC_BASE@/../README.md
+RECURSIVE              = NO
+
+# Document the full API surface: pretend every Kconfig gate is enabled, and
+# let __DOXYGEN__-guarded blocks (SAFE_COMMIT, SAFE_SECTION, selftest) appear.
+PREDEFINED             = __DOXYGEN__ \
+                         CONFIG_SAFE_DATA \
+                         CONFIG_SAFE_DATA_LOCKING=1 \
+                         CONFIG_SAFE_DATA_REDUNDANT=1 \
+                         CONFIG_SAFE_DATA_STATS \
+                         CONFIG_SAFE_DATA_SELFTEST \
+                         CONFIG_SAFE_DATA_SELFTEST_BOOT \
+                         CONFIG_SAFE_DATA_ALLOW_UNCHECKED_COMMIT \
+                         CONFIG_SAFE_DATA_GNU_EXTENSIONS \
+                         CONFIG_SAFE_DATA_LOCK_TIMEOUT_MS=0 \
+                         CONFIG_SAFE_DATA_WRITE_CHECKS_OLD \
+                         __weak=
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = NO
+
+EXTRACT_ALL            = YES
+EXTRACT_STATIC         = YES
+OPTIMIZE_OUTPUT_FOR_C  = YES
+TYPEDEF_HIDES_STRUCT   = YES
+
+# Hide the implementation-detail namespace (z_/Z_ prefixed helpers and the
+# private container access macros) from the rendered API.
+EXCLUDE_SYMBOLS        = z_* Z_* _SAFE_*
+
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = NO
+
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+GENERATE_LATEX         = NO
+GENERATE_XML           = NO
+
+GENERATE_TREEVIEW      = YES
+SOURCE_BROWSER         = YES
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+
+ALIASES                = "verifies=\xrefitem verifies \"Verifies\" \"Verified requirements\""
