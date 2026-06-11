@@ -1,0 +1,40 @@
+tests:
+  # Default suite: redundant shadow copy on, so the recovery / rollback paths
+  # are exercised.
+  safe_data.api:
+    platform_allow:
+      - native_sim
+    tags:
+      - safe_data
+    extra_configs:
+      - CONFIG_SAFE_DATA_REDUNDANT=y
+
+  # Detection-only variant: no shadow copy. Exercises the !REDUNDANT branches
+  # (corruption is detected but not recoverable, abort leaves a detectable tag).
+  safe_data.api.plain:
+    platform_allow:
+      - native_sim
+    tags:
+      - safe_data
+    extra_configs:
+      - CONFIG_SAFE_DATA_REDUNDANT=n
+
+  # Bounded locking: a contended container access must fail with -ETIMEDOUT
+  # within the configured bound and the timeout must be observable.
+  safe_data.api.timeout:
+    platform_allow:
+      - native_sim
+    tags:
+      - safe_data
+    extra_configs:
+      - CONFIG_SAFE_DATA_LOCK_TIMEOUT_MS=20
+
+  # Strict integrity-level preset: self-test at boot, verify-before-write,
+  # reduced API surface (no SAFE_COMMIT, no SAFE_SECTION/GNU extensions).
+  safe_data.api.strict:
+    platform_allow:
+      - native_sim
+    tags:
+      - safe_data
+    extra_configs:
+      - CONFIG_SAFE_DATA_LEVEL_STRICT=y

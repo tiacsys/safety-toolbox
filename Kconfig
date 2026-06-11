@@ -1,0 +1,197 @@
+# Safe Data API
+# Copyright (c) 2026
+# SPDX-License-Identifier: Apache-2.0
+
+menuconfig SAFE_DATA
+	bool "Safe data containers (CRC-protected variables)"
+	select CRC
+	help
+	  Generic facility for protecting variables and data structures with an
+	  integrity tag (CRC), an optional redundant shadow copy, and a mutex,
+	  so that data integrity is guaranteed by construction.
+
+if SAFE_DATA
+
+choice SAFE_DATA_INTEGRITY_LEVEL
+	prompt "Integrity level preset"
+	default SAFE_DATA_LEVEL_BASIC
+	help
+	  Convenience presets that imply a coherent set of the individual
+	  options below. Every implied option can still be overridden
+	  individually.
+
+config SAFE_DATA_LEVEL_BASIC
+	bool "Basic - detection only"
+	help
+	  CRC detection with the configured fault reaction. No redundancy,
+	  no diagnostics beyond the return codes.
+
+config SAFE_DATA_LEVEL_ENHANCED
+	bool "Enhanced - detection + recovery + observability"
+	imply SAFE_DATA_REDUNDANT
+	imply SAFE_DATA_STATS
+	help
+	  Adds the redundant shadow copy (single-fault recovery and RMW
+	  rollback) and the fault/recovery statistics interface, so that a
+	  health monitor can observe every integrity event.
+
+config SAFE_DATA_LEVEL_STRICT
+	bool "Strict - enhanced + self-test, checked writes, reduced API surface"
+	imply SAFE_DATA_REDUNDANT
+	imply SAFE_DATA_STATS
+	imply SAFE_DATA_SELFTEST
+	imply SAFE_DATA_SELFTEST_BOOT
+	imply SAFE_DATA_WRITE_CHECKS_OLD
+	help
+	  Everything from Enhanced, plus: startup self-test of the integrity
+	  mechanism itself (known-answer + detect/recover round trip),
+	  verify-before-overwrite so corruption can never be silently masked
+	  by a write, and a reduced API surface for certified builds - the
+	  unchecked SAFE_COMMIT and the GNU-extension SAFE_SECTION macro
+	  default to disabled (see SAFE_DATA_ALLOW_UNCHECKED_COMMIT and
+	  SAFE_DATA_GNU_EXTENSIONS).
+
+endchoice
+
+choice SAFE_DATA_CRC
+	prompt "Integrity tag algorithm"
+	default SAFE_DATA_CRC32_IEEE
+	help
+	  Algorithm used to compute the integrity tag over the payload.
+
+config SAFE_DATA_CRC32_IEEE
+	bool "CRC-32 IEEE"
+	help
+	  Strongest of the offered options; 4 bytes of tag per container.
+
+config SAFE_DATA_CRC16_CCITT
+	bool "CRC-16 CCITT"
+	help
+	  Smaller tag computation; suitable for small payloads.
+
+config SAFE_DATA_CRC8_CCITT
+	bool "CRC-8 CCITT"
+	help
+	  Cheapest option; weakest detection. Small payloads only.
+
+endchoice
+
+config SAFE_DATA_LOCKING
+	bool "Embed a mutex in each container"
+	default y
+	help
+	  Embed a k_mutex in every safe container and serialise all accesses with
+	  it (read-modify-write, read, write). Disable this to drop the mutex and
+	  its locking overhead when a container is only ever accessed from a
+	  single context (e.g. one thread, or read-only after init). With locking
+	  disabled the caller is responsible for any required mutual exclusion.
+
+config SAFE_DATA_REDUNDANT
+	bool "Keep a redundant inverted shadow copy"
+	help
+	  Store a bitwise-inverted shadow copy of every payload. This doubles the
+	  payload RAM cost but lets safe_data_verify() detect a wider class of
+	  faults and recover the payload (or a corrupted integrity tag) from the
+	  good copy instead of only trapping.
+
+config SAFE_DATA_LOCK_TIMEOUT_MS
+	int "Lock acquisition timeout in milliseconds (0 = wait forever)"
+	default 0
+	depends on SAFE_DATA_LOCKING
+	help
+	  Upper bound on how long any safe-data operation may block waiting
+	  for a container's mutex. On expiry the operation fails with
+	  -ETIMEDOUT (counted in the statistics and reported to the fault
+	  handler as a lock-timeout event) instead of blocking forever.
+	  Bounded blocking is required to give safety-relevant accesses a
+	  bounded worst-case execution time. 0 keeps the legacy wait-forever
+	  behaviour.
+
+config SAFE_DATA_STATS
+	bool "Fault and recovery statistics"
+	help
+	  Count every integrity event (recovered-from-tag, recovered-from-
+	  shadow, unrecoverable, lock timeout, overwritten-corrupt, clamped
+	  mutator return) in a global statistics block readable via
+	  safe_data_stats_get(). This is the observability interface a
+	  health monitor / diagnostic layer hooks into; without it,
+	  recovered faults are visible only in the log.
+
+config SAFE_DATA_WRITE_CHECKS_OLD
+	bool "Verify the old contents before overwriting (observe-only)"
+	help
+	  safe_data_write() normally replaces the payload without looking at
+	  it, which silently destroys the evidence of any pre-existing
+	  corruption. With this option the old contents are verified first;
+	  the result does NOT change the write's outcome, but a detected
+	  corruption is counted in the statistics and reported to the
+	  registered fault handler as an overwritten-corrupt event, so
+	  diagnostic coverage is preserved.
+
+config SAFE_DATA_SELFTEST
+	bool "Integrity-mechanism self-test"
+	help
+	  Provide safe_data_selftest(): a known-answer test of the CRC
+	  backend plus a seal/corrupt/detect(/recover) round trip on a
+	  scratch container. Detects a broken integrity mechanism (e.g. a
+	  corrupted CRC table) - the diagnostic that diagnoses the
+	  diagnostic.
+
+config SAFE_DATA_SELFTEST_BOOT
+	bool "Run the self-test automatically at boot"
+	depends on SAFE_DATA_SELFTEST
+	help
+	  Run safe_data_selftest() from a SYS_INIT hook (POST_KERNEL). A
+	  failure logs and panics: if the integrity mechanism itself is
+	  broken, no protected data can be trusted. The result is also
+	  queryable via safe_data_selftest_result().
+
+config SAFE_DATA_ALLOW_UNCHECKED_COMMIT
+	bool "Allow SAFE_COMMIT / safe_data_commit() (reseal without verify)"
+	default y if !SAFE_DATA_LEVEL_STRICT
+	help
+	  safe_data_commit() re-tags whatever is currently in memory without
+	  any verification - a deliberate escape hatch for audited low-level
+	  paths, but also a one-call defeat of the integrity guarantee.
+	  Disable to remove it from the API surface entirely (uses fail to
+	  compile). Defaults off at the Strict level.
+
+config SAFE_DATA_GNU_EXTENSIONS
+	bool "Allow the SAFE_SECTION scoped-block macro (GNU C extensions)"
+	default y if !SAFE_DATA_LEVEL_STRICT
+	help
+	  SAFE_SECTION() relies on GNU C statement expressions and
+	  __typeof__, and hides control flow in a for-loop - convenient, but
+	  outside the strict C standard subset and outside MISRA-friendly
+	  style. Disable to remove it from the API surface (the callback-
+	  based SAFE_UPDATE provides the same guarantee in standard C).
+	  Defaults off at the Strict level.
+
+choice SAFE_DATA_FAULT_ACTION
+	prompt "Action on unrecoverable integrity fault"
+	default SAFE_DATA_FAULT_RETURN
+	help
+	  What to do when corruption is detected and cannot be recovered.
+
+config SAFE_DATA_FAULT_RETURN
+	bool "Return an error (-EILSEQ)"
+	help
+	  Let the caller inspect the return code and decide how to react.
+
+config SAFE_DATA_FAULT_HANDLER
+	bool "Call safe_data_fault_handler()"
+	help
+	  Invoke the user-overridable weak handler, then return -EILSEQ.
+
+config SAFE_DATA_FAULT_PANIC
+	bool "Panic (k_panic)"
+	help
+	  Immediately halt via k_panic(). Mirrors the original prototype.
+
+endchoice
+
+module = SAFE_DATA
+module-str = safe_data
+source "subsys/logging/Kconfig.template.log_config"
+
+endif # SAFE_DATA
