@@ -45,6 +45,10 @@ EXCLUDE_SYMBOLS        = z_* Z_* _SAFE_*
 QUIET                  = YES
 WARN_IF_UNDOCUMENTED   = NO
 
+# @kconfig_depends{COND}: a Kconfig condition the symbol exists or works under
+# (one per condition); zdocs puts it into the impl need's depends_on field.
+ALIASES                = "kconfig_depends{1}=\xrefitem kconfig_depends \"Depends on\" \"Kconfig dependencies\" \1"
+
 # Requirement traceability (the API satisfies requirements; verification is in the test sources).
 REQ_TRACEABILITY_INFO  = UNSATISFIED_ONLY
 

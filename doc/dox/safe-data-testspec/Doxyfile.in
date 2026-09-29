@@ -38,10 +38,13 @@ WARN_IF_UNDOCUMENTED   = NO
 #                    one UID per command; resolved against the requirement
 #                    specification's needs tag (doxygen_tag in documents.yaml)
 #   @draft/@active/@obsolete  test status   -> xrefsect "test_<status>"
+#   @kconfig_depends{COND}    a Kconfig condition the test needs to run
+#                    (one per condition) -> the need's depends_on field
 ALIASES                = "testid{1}=\xrefitem testids \"Test ID\" \"Test IDs\" \1" \
                          "draft=\qualifier draft^^\xrefitem test_draft \"Test Status: Draft\" \"Draft Test Cases\"" \
                          "active=\qualifier active^^\xrefitem test_active \"Test Status: Active\" \"Active Test Cases\"" \
-                         "obsolete=\qualifier obsolete^^\xrefitem test_obsolete \"Test Status: Obsolete\" \"Obsolete Test Cases\""
+                         "obsolete=\qualifier obsolete^^\xrefitem test_obsolete \"Test Status: Obsolete\" \"Obsolete Test Cases\"" \
+                         "kconfig_depends{1}=\xrefitem kconfig_depends \"Depends on\" \"Kconfig dependencies\" \1"
 
 ENABLE_PREPROCESSING   = YES
 MACRO_EXPANSION        = YES

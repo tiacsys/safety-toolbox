@@ -6,7 +6,7 @@ Test case → requirement mapping
 
 .. needtable::
    :types: test_case
-   :columns: id, title, suite, status, verifies
+   :columns: id, title, suite, status, depends_on, verifies
    :style: table
 
 Covered requirements
@@ -32,13 +32,27 @@ Requirements not yet covered by any test case.
 Implementation → requirement
 ============================
 
-The API side of the chain is recorded in the source: each public function
-names the requirements it satisfies with Doxygen's native ``@satisfies``,
-resolved against this specification's requirements like the tests'
-``@verifies``. Doxygen renders that half, with every requirement's
-"satisfied by" members and the requirements that no API entity satisfies, on
-the `API requirements page <../dox-safe-data-api/requirements.html>`_.
-Requirements that constrain the whole API rather than one function (argument
-validation, bounded locking, serialised access, ISR restrictions, the Strict
-API surface) are listed there as unsatisfied on purpose: they are traced at
-the design level, not to a single member.
+API symbols (``impl`` needs from the *API Traceability*) and the requirements
+they satisfy (``@satisfies`` in ``include/safe_data/safe_data.h``):
+
+.. needtable::
+   :types: impl
+   :columns: id, title, depends_on, satisfies
+   :style: table
+
+Requirements satisfied by an API symbol:
+
+.. needtable::
+   :filter: type == "requirement" and satisfies_back
+   :columns: id, title, satisfies_back
+   :style: table
+
+Requirements not satisfied by a single API symbol. These constrain the whole
+API (argument validation, fault reaction, bounded locking, ISR restrictions,
+serialised access, the Strict API surface) and are left for a design-level
+trace on purpose:
+
+.. needtable::
+   :filter: type == "requirement" and not satisfies_back
+   :columns: id, title
+   :style: table

@@ -1,7 +1,8 @@
 # Safe Data API — Documentation
 
-Five documents form the traceability chain
-**requirement → test case → test result**, plus the rendered API reference.
+Six documents form the traceability chain
+**requirement → test case → test result** and **requirement → API symbol**,
+plus the rendered API reference.
 They are built by the [zdocs](https://github.com/tiacsys/zdocs) engine, a
 Zephyr module declared in the repository's `west.yml`. Every document is
 declared once in [`documents.yaml`](documents.yaml), and zdocs derives all
@@ -12,6 +13,7 @@ cross-document links from it.
 | Requirement Specification (`requirement-specification`) | `requirement-specification/*.rst` | `SD-TOP-…` / `SD-REQ-…` sphinx-needs requirements, authored here |
 | Test Specification (`test-specification`) | the annotated `ZTEST()` sources, via `dox-safe-data-testspec` | one `TC_…` test case per ZTEST; each `verifies` requirements |
 | Test Report (`test-report`) | twister output (`twister_report.xml`, `twister.json`) | one `TR-…` result per scenario × test case; `result_of` its test case, `covers` its requirements |
+| API Traceability (`api-traceability`) | the `@satisfies` in `include/safe_data/safe_data.h`, via `dox-safe-data-api` | one `IMPL-<symbol>` need per annotated API symbol; `satisfies` requirements |
 | API Reference (`dox-safe-data-api`) | `include/`, `src/`, `README.md` | Doxygen rendering of the API |
 | Test Sources (`dox-safe-data-testspec`) | `tests/safe_data/src/main.c` | Doxygen rendering of the annotated tests; its XML feeds the test specification |
 
@@ -50,9 +52,18 @@ cross-document links from it.
 4. **Twister results.** In the test report, `.. testreport::` and
    `.. twisterinfo::` read the twister output directory and emit one
    `test_result` need per scenario × test case.
-5. **Traceability matrix.** `test-specification/traceability.rst` renders
-   test case → requirement, the covered requirements, and the **coverage
-   gaps**.
+5. **The API side.** Public functions and macros name the requirements they
+   implement with `@satisfies SD-REQ-…` in the header, only where the
+   requirement names the symbol. `.. symbolneeds::` in the API traceability
+   turns each into an `impl` need linked `satisfies`, so a requirement shows
+   "satisfied by" beside "verified by". A typo'd UID fails the build here too.
+6. **Kconfig dependencies.** `@kconfig_depends{CONFIG_…}` (one per condition)
+   on a test or symbol that only runs or exists under that option fills the
+   need's `depends_on` field. It explains the scenario skips in the report.
+7. **Traceability matrix.** `test-specification/traceability.rst` renders
+   test case → requirement, the covered requirements, the **coverage gaps**,
+   and the implementation half: symbol → requirement, the satisfied
+   requirements, and those left for a design-level trace.
 
 ## Build
 

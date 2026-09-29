@@ -175,6 +175,7 @@ ZTEST(safe_data, test_update_abort_keeps_integrity)
  *
  * @testid{TC_SAFE_DATA_SECTION_SCOPE}
  * @verifies SD-REQ-021
+ * @kconfig_depends{CONFIG_SAFE_DATA_GNU_EXTENSIONS}
  * @active
  */
 ZTEST(safe_data, test_section_scope)
@@ -243,6 +244,7 @@ ZTEST(safe_data, test_detects_corruption)
  * @testid{TC_SAFE_DATA_VERIFY_REPAIR_FIXES_IN_PLACE}
  * @verifies SD-REQ-004
  * @verifies SD-REQ-009
+ * @kconfig_depends{CONFIG_SAFE_DATA_REDUNDANT}
  * @active
  */
 ZTEST(safe_data, test_verify_repair_fixes_in_place)
@@ -274,6 +276,7 @@ ZTEST(safe_data, test_verify_repair_fixes_in_place)
  *
  * @testid{TC_SAFE_DATA_COMMIT_RESEALS_EXTERNAL_WRITE}
  * @verifies SD-REQ-022
+ * @kconfig_depends{CONFIG_SAFE_DATA_ALLOW_UNCHECKED_COMMIT}
  * @active
  */
 ZTEST(safe_data, test_commit_reseals_external_write)
@@ -310,6 +313,7 @@ ZTEST(safe_data, test_commit_reseals_external_write)
  *
  * @testid{TC_SAFE_DATA_STALE_TAG_RECOVERS}
  * @verifies SD-REQ-009
+ * @kconfig_depends{CONFIG_SAFE_DATA_REDUNDANT}
  * @draft
  */
 ZTEST(safe_data, test_stale_tag_recovers)
@@ -343,6 +347,7 @@ ZTEST(safe_data, test_stale_tag_recovers)
  *
  * @testid{TC_SAFE_DATA_DOUBLE_FAULT_UNRECOVERABLE}
  * @verifies SD-REQ-010
+ * @kconfig_depends{CONFIG_SAFE_DATA_REDUNDANT}
  * @active
  */
 ZTEST(safe_data, test_double_fault_unrecoverable)
@@ -524,6 +529,7 @@ ZTEST(safe_data, test_concurrent_access_is_serialised)
  *
  * @testid{TC_SAFE_DATA_SELFTEST}
  * @verifies SD-REQ-017
+ * @kconfig_depends{CONFIG_SAFE_DATA_SELFTEST}
  * @active
  */
 ZTEST(safe_data, test_selftest)
@@ -543,6 +549,7 @@ ZTEST(safe_data, test_selftest)
  *
  * @testid{TC_SAFE_DATA_STATS_COUNT_EVENTS}
  * @verifies SD-REQ-012
+ * @kconfig_depends{CONFIG_SAFE_DATA_STATS}
  * @active
  */
 ZTEST(safe_data, test_stats_count_events)
@@ -703,6 +710,8 @@ ZTEST(safe_data, test_update_clamps_positive_mutator_return)
  *
  * @testid{TC_SAFE_DATA_WRITE_OBSERVES_OVERWRITTEN_CORRUPTION}
  * @verifies SD-REQ-018
+ * @kconfig_depends{CONFIG_SAFE_DATA_WRITE_CHECKS_OLD}
+ * @kconfig_depends{CONFIG_SAFE_DATA_STATS}
  * @active
  */
 ZTEST(safe_data, test_write_observes_overwritten_corruption)
@@ -756,6 +765,8 @@ static void holder_fn(void *a, void *b, void *c)
  *
  * @testid{TC_SAFE_DATA_LOCK_TIMEOUT_IS_BOUNDED_AND_REPORTED}
  * @verifies SD-REQ-014
+ * @kconfig_depends{CONFIG_SAFE_DATA_LOCK_TIMEOUT_MS > 0}
+ * @kconfig_depends{CONFIG_SAFE_DATA_LOCKING}
  * @active
  */
 ZTEST(safe_data, test_lock_timeout_is_bounded_and_reported)

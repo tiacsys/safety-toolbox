@@ -11,6 +11,7 @@ Intersphinx — other Sphinx documents
 
 * Requirement Specification: :external+req:doc:`index`
 * Test Specification: :external+testspec:doc:`index`
+* API Traceability: :external+apitrace:doc:`index`
 
 Doxylink — Doxygen documents
 ============================
@@ -23,3 +24,4 @@ External needs — sphinx-needs imports
 
 * Requirement Specification: :need:`SD-REQ-001`
 * Test Specification: :need:`TC_SAFE_DATA_INIT_AND_VERIFY`
+* API Traceability: :need:`IMPL-safe_data_init`

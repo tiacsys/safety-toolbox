@@ -67,6 +67,20 @@ documents:
     testmodule:
       spec: test-specification
 
+  # One impl need per API symbol that carries `@satisfies`, generated from
+  # the API Doxygen XML by `.. symbolneeds::`. Its needs.json is imported by
+  # every peer, so a requirement shows "satisfied by" beside "verified by".
+  api-traceability:
+    title: "API Traceability"
+    kind: sphinx
+    group: specification
+    prefix: apitrace
+    builders: [html]
+    needs:
+      source: json
+    symbol_needs:
+      doxygen_source: dox-safe-data-api
+
   dox-safe-data-api:
     title: "API Reference (Doxygen)"
     kind: doxygen

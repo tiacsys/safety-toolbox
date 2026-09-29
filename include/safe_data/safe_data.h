@@ -200,6 +200,7 @@ struct safe_data_stats {
  * @return 0 on success, -EINVAL on NULL, -ENOTSUP without CONFIG_SAFE_DATA_STATS.
  *
  * @satisfies SD-REQ-012
+ * @kconfig_depends{CONFIG_SAFE_DATA_STATS}
  */
 int safe_data_stats_get(struct safe_data_stats *out);
 
@@ -217,6 +218,7 @@ void safe_data_stats_reset(void);
  * @return 0 if the mechanism is healthy, -EFAULT if any step fails.
  *
  * @satisfies SD-REQ-017
+ * @kconfig_depends{CONFIG_SAFE_DATA_SELFTEST}
  */
 int safe_data_selftest(void);
 
@@ -390,6 +392,7 @@ int safe_data_update(struct k_mutex *lock, void *payload, size_t len,
  *         expired.
  *
  * @satisfies SD-REQ-022
+ * @kconfig_depends{CONFIG_SAFE_DATA_ALLOW_UNCHECKED_COMMIT}
  */
 int safe_data_commit(struct k_mutex *lock, void *payload, size_t len,
 		     uint32_t *crc, void *shadow);
@@ -621,6 +624,7 @@ static inline void z_safe_unlock(struct k_mutex *lock)
  * @param _pvar Name of the typed payload-pointer variable scoped to the block.
  *
  * @satisfies SD-REQ-021
+ * @kconfig_depends{CONFIG_SAFE_DATA_GNU_EXTENSIONS}
  */
 #if defined(CONFIG_SAFE_DATA_GNU_EXTENSIONS) || defined(__DOXYGEN__)
 #define SAFE_SECTION(_c, _pvar)                                                \

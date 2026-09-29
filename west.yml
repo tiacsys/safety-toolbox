@@ -36,9 +36,10 @@ manifest:
     # exact behaviour. This commit carries the `doxygen_tag:` registry key
     # (f735c41) and its parser fix (9a25655), the ZEPHYR_BASE forwarding fix
     # (7554422), and the incremental-rebuild fixes for the test report and
-    # the test specification (967d417, 4da0074, 7a3f37c). It resolves on
+    # the test specification (967d417, 4da0074, 7a3f37c), and the API symbol
+    # needs and Kconfig dependencies (aaa2d98, f6f282a). It resolves on
     # GitHub once zdocs is pushed.
     - name: zdocs
       url: git@github.com:tiacsys/zdocs.git
-      revision: 7a3f37cda60bfa279a7c7b2f6dbc1072e0d0bd2c
+      revision: f6f282a1442cec15f2f66002134a008b84399785
       path: tools/zdocs

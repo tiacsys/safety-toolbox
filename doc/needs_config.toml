@@ -46,6 +46,15 @@ prefix = "TR-"
 color = "#D6E4F7"
 style = "node"
 
+# One need per API symbol that carries a Doxygen `@satisfies`, emitted by
+# `.. symbolneeds::` (api-traceability) under the engine's default name.
+[[needs.types]]
+directive = "impl"
+title = "Implementation"
+prefix = "IMPL-"
+color = "#EDE7F6"
+style = "node"
+
 [needs.links.refines]
 description = "Detailed requirement refines a top-level requirement"
 incoming = "refined by"
@@ -55,6 +64,11 @@ outgoing = "refines"
 description = "Test case verifies a requirement"
 incoming = "verified by"
 outgoing = "verifies"
+
+[needs.links.satisfies]
+description = "API symbol satisfies a requirement"
+incoming = "satisfied by"
+outgoing = "satisfies"
 
 [needs.links.result_of]
 description = "Test result belongs to a test case"
@@ -119,4 +133,11 @@ type = "string"
 description = "Skip/failure reason"
 nullable = true
 [needs.fields.reason.schema]
+type = "string"
+
+# Kconfig conditions a test case or API symbol needs (@kconfig_depends).
+[needs.fields.depends_on]
+description = "Kconfig condition(s) the item needs; several joined with '; '"
+nullable = true
+[needs.fields.depends_on.schema]
 type = "string"
