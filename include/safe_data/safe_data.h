@@ -158,6 +158,8 @@ typedef void (*safe_data_fault_cb_t)(const struct safe_data_fault_info *info);
  *
  * @param cb Handler, or NULL to unregister.
  * @return 0 on success, -EALREADY if a (different) handler is registered.
+ *
+ * @satisfies SD-REQ-013
  */
 int safe_data_fault_handler_register(safe_data_fault_cb_t cb);
 
@@ -196,6 +198,8 @@ struct safe_data_stats {
  *
  * @param out Destination for the counter snapshot.
  * @return 0 on success, -EINVAL on NULL, -ENOTSUP without CONFIG_SAFE_DATA_STATS.
+ *
+ * @satisfies SD-REQ-012
  */
 int safe_data_stats_get(struct safe_data_stats *out);
 
@@ -211,6 +215,8 @@ void safe_data_stats_reset(void);
  * invoking the configured fault reaction and without polluting the statistics.
  *
  * @return 0 if the mechanism is healthy, -EFAULT if any step fails.
+ *
+ * @satisfies SD-REQ-017
  */
 int safe_data_selftest(void);
 
@@ -247,6 +253,8 @@ int safe_data_selftest_result(void);
  * @param crc     Integrity tag storage.
  * @param shadow  Redundant shadow buffer of @p len bytes, or NULL if disabled.
  * @return 0 on success, -EINVAL on bad arguments.
+ *
+ * @satisfies SD-REQ-001
  */
 int safe_data_init(struct k_mutex *lock, void *payload, size_t len,
 		   uint32_t *crc, void *shadow);
@@ -264,6 +272,8 @@ int safe_data_init(struct k_mutex *lock, void *payload, size_t len,
  * @return 0 if valid, SAFE_DATA_RECOVERED (-EAGAIN) if corrupt but recoverable
  *         from the shadow copy (payload untouched), -EILSEQ if corrupt and
  *         unrecoverable, -EINVAL on bad args.
+ *
+ * @satisfies SD-REQ-003
  */
 int safe_data_verify(const void *payload, size_t len, uint32_t crc,
 		     const void *shadow);
@@ -284,6 +294,10 @@ int safe_data_verify(const void *payload, size_t len, uint32_t crc,
  * @return 0 if valid, SAFE_DATA_RECOVERED (-EAGAIN) if the payload was repaired
  *         from the shadow copy (reseal required), -EILSEQ if corrupt and
  *         unrecoverable, -EINVAL on bad args.
+ *
+ * @satisfies SD-REQ-004
+ * @satisfies SD-REQ-009
+ * @satisfies SD-REQ-010
  */
 int safe_data_verify_repair(void *payload, size_t len, uint32_t crc,
 			    void *shadow);
@@ -302,6 +316,8 @@ int safe_data_verify_repair(void *payload, size_t len, uint32_t crc,
  * @param out     Destination buffer of @p len bytes for the validated copy.
  * @return 0 on success (incl. recovered), -EILSEQ if unrecoverable, -EINVAL on
  *         bad args, -ETIMEDOUT if the lock bound expired.
+ *
+ * @satisfies SD-REQ-005
  */
 int safe_data_read(struct k_mutex *lock, void *payload, size_t len,
 		   uint32_t *crc, void *shadow, void *out);
@@ -321,6 +337,9 @@ int safe_data_read(struct k_mutex *lock, void *payload, size_t len,
  * @param in      Source buffer of @p len bytes to copy into the payload.
  * @return 0 on success, -EINVAL on bad args, -ETIMEDOUT if the lock bound
  *         expired.
+ *
+ * @satisfies SD-REQ-006
+ * @satisfies SD-REQ-018
  */
 int safe_data_write(struct k_mutex *lock, void *payload, size_t len,
 		    uint32_t *crc, void *shadow, const void *in);
@@ -344,6 +363,9 @@ int safe_data_write(struct k_mutex *lock, void *payload, size_t len,
  *         (a positive mutator return is clamped to -EINVAL), -EILSEQ if the
  *         pre-check fails unrecoverably, -EINVAL on bad args, -ETIMEDOUT if
  *         the lock bound expired.
+ *
+ * @satisfies SD-REQ-007
+ * @satisfies SD-REQ-008
  */
 int safe_data_update(struct k_mutex *lock, void *payload, size_t len,
 		     uint32_t *crc, void *shadow,
@@ -366,6 +388,8 @@ int safe_data_update(struct k_mutex *lock, void *payload, size_t len,
  *                if disabled.
  * @return 0 on success, -EINVAL on bad args, -ETIMEDOUT if the lock bound
  *         expired.
+ *
+ * @satisfies SD-REQ-022
  */
 int safe_data_commit(struct k_mutex *lock, void *payload, size_t len,
 		     uint32_t *crc, void *shadow);
@@ -464,6 +488,8 @@ static inline void z_safe_unlock(struct k_mutex *lock)
  *
  * @param _container_name Name of the generated struct type.
  * @param _payload_type   Complete type of the protected payload.
+ *
+ * @satisfies SD-REQ-019
  */
 #define SAFE_CONTAINER_DEFINE(_container_name, _payload_type)                  \
 	struct _container_name {                                               \
@@ -593,6 +619,8 @@ static inline void z_safe_unlock(struct k_mutex *lock)
  *
  * @param _c    Pointer to a container declared with SAFE_CONTAINER_DEFINE().
  * @param _pvar Name of the typed payload-pointer variable scoped to the block.
+ *
+ * @satisfies SD-REQ-021
  */
 #if defined(CONFIG_SAFE_DATA_GNU_EXTENSIONS) || defined(__DOXYGEN__)
 #define SAFE_SECTION(_c, _pvar)                                                \

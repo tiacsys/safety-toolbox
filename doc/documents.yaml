@@ -25,8 +25,10 @@ groups:
 
 documents:
   # The requirements, authored in rst as sphinx-needs. `doxygen_tag` publishes
-  # them as a Doxygen tag file, so `\verifies` in the test sources and
-  # `\satisfies` in the API resolve against them and link here.
+  # the detailed ones as a Doxygen tag file, so `\verifies` in the test sources
+  # and `\satisfies` in the API resolve against them and link here. Top-level
+  # requirements are refined, never verified or satisfied directly, so they
+  # stay out of it (otherwise Doxygen lists all seven as unsatisfied).
   requirement-specification:
     title: "Requirement Specification"
     kind: sphinx
@@ -36,7 +38,7 @@ documents:
     needs:
       source: json
     doxygen_tag:
-      types: [top_requirement, requirement]
+      types: [requirement]
 
   # One test_case need per annotated ZTEST, generated from the testspec
   # Doxygen XML by `.. testmodule::`.

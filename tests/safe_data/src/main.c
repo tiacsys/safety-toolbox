@@ -75,9 +75,13 @@ ZTEST(safe_data, test_read_roundtrip)
  * After SAFE_WRITE the container verifies clean and a subsequent read returns
  * the new value: the tag can never go stale across a write.
  *
+ * Status obsolete (demonstration of status handling): superseded by
+ * TC_SAFE_DATA_READ_ROUNDTRIP, which checks the resealed write through a
+ * validated read. The test still runs.
+ *
  * @testid{TC_SAFE_DATA_WRITE_RESEALS}
  * @verifies SD-REQ-006
- * @active
+ * @obsolete
  */
 ZTEST(safe_data, test_write_reseals)
 {
@@ -300,9 +304,13 @@ ZTEST(safe_data, test_commit_reseals_external_write)
  * When only the stored tag is corrupted (payload and shadow agree), the fault
  * is recoverable; a locked read makes the reseal durable.
  *
+ * Status draft (demonstration of status handling): SD-REQ-009 is also
+ * verified by TC_SAFE_DATA_DETECTS_CORRUPTION and
+ * TC_SAFE_DATA_VERIFY_REPAIR_FIXES_IN_PLACE. The test still runs.
+ *
  * @testid{TC_SAFE_DATA_STALE_TAG_RECOVERS}
  * @verifies SD-REQ-009
- * @active
+ * @draft
  */
 ZTEST(safe_data, test_stale_tag_recovers)
 {

@@ -45,6 +45,9 @@ EXCLUDE_SYMBOLS        = z_* Z_* _SAFE_*
 QUIET                  = YES
 WARN_IF_UNDOCUMENTED   = NO
 
+# Requirement traceability (the API satisfies requirements; verification is in the test sources).
+REQ_TRACEABILITY_INFO  = UNSATISFIED_ONLY
+
 GENERATE_HTML          = YES
 GENERATE_LATEX         = NO
 

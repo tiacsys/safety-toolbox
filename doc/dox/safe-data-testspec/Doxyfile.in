@@ -55,6 +55,9 @@ PREDEFINED             = __DOXYGEN__ \
                          "ZTEST_SUITE(suite, u1, u2, u3, u4, u5)=/** \defgroup suite suite */"
 SKIP_FUNCTION_MACROS   = NO
 
+# Requirement traceability (the tests verify requirements; satisfaction is in the API).
+REQ_TRACEABILITY_INFO  = UNVERIFIED_ONLY
+
 GENERATE_HTML          = YES
 SOURCE_BROWSER         = YES
 GENERATE_LATEX         = NO
