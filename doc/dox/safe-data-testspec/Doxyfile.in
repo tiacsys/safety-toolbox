@@ -1,23 +1,24 @@
 # Doxygen template — Safe Data API test specification (XML + HTML).
-# Configured by doc/CMakeLists.txt; @DOC_BASE@ / @DOXY_OUT@ are substituted.
+# Configured by the zdocs engine (@ONLY): @DOXY_SRC_DIR@ is this folder,
+# @SAFE_DATA_BASE@ the repository root (set in doc/CMakeLists.txt). zdocs
+# appends the keys it owns (HTML/XML output, tag files, theme, version).
 #
 # The PREDEFINED expansions turn the ztest macros into doxygen-visible
 # entities: every ZTEST_SUITE() defines a doxygen group named after the ztest
 # suite, every ZTEST() function joins that group. The group hierarchy above
 # the suites (all_tests / safe_data_tests / safe_data_module) lives in
-# _doxygen/safe-data-test-groups.dox and the annotations in the test sources.
+# groups.dox and the annotations in the test sources.
 
 PROJECT_NAME           = "Safe Data API Test Specification"
 PROJECT_BRIEF          = "Annotated ztest sources of the Safe Data API"
-PROJECT_NUMBER         = 0.2
 
 OUTPUT_DIRECTORY       = @DOXY_OUT@
 CREATE_SUBDIRS         = NO
 
-INPUT                  = @DOC_BASE@/_doxygen/mainpage-safe-data-testspec.md \
-                         @DOC_BASE@/_doxygen/safe-data-test-groups.dox \
-                         @DOC_BASE@/../tests/safe_data/src/main.c
-USE_MDFILE_AS_MAINPAGE = @DOC_BASE@/_doxygen/mainpage-safe-data-testspec.md
+INPUT                  = @DOXY_SRC_DIR@/mainpage.md \
+                         @DOXY_SRC_DIR@/groups.dox \
+                         @SAFE_DATA_BASE@/tests/safe_data/src/main.c
+USE_MDFILE_AS_MAINPAGE = @DOXY_SRC_DIR@/mainpage.md
 RECURSIVE              = NO
 
 JAVADOC_AUTOBRIEF      = YES
@@ -33,10 +34,11 @@ WARN_IF_UNDOCUMENTED   = NO
 
 # Test-annotation vocabulary (subset of the zephyr-safety conventions):
 #   @testid{ID}      stable test-case ID    -> xrefsect "testids"
-#   @reqref{REQ-ID}  verified requirement   -> xrefsect "reqrefs"
+#   @verifies REQ-ID verified requirement   -> native Doxygen (>= 1.16),
+#                    one UID per command; resolved against the requirement
+#                    specification's needs tag (doxygen_tag in documents.yaml)
 #   @draft/@active/@obsolete  test status   -> xrefsect "test_<status>"
 ALIASES                = "testid{1}=\xrefitem testids \"Test ID\" \"Test IDs\" \1" \
-                         "reqref{1}=\xrefitem reqrefs \"Requirement\" \"Requirements\" \1" \
                          "draft=\qualifier draft^^\xrefitem test_draft \"Test Status: Draft\" \"Draft Test Cases\"" \
                          "active=\qualifier active^^\xrefitem test_active \"Test Status: Active\" \"Active Test Cases\"" \
                          "obsolete=\qualifier obsolete^^\xrefitem test_obsolete \"Test Status: Obsolete\" \"Obsolete Test Cases\""
@@ -54,11 +56,7 @@ PREDEFINED             = __DOXYGEN__ \
 SKIP_FUNCTION_MACROS   = NO
 
 GENERATE_HTML          = YES
-HTML_OUTPUT            = html
-GENERATE_TREEVIEW      = YES
 SOURCE_BROWSER         = YES
 GENERATE_LATEX         = NO
 
-GENERATE_XML           = YES
-XML_OUTPUT             = xml
 XML_PROGRAMLISTING     = NO

@@ -1,19 +1,19 @@
 # Doxygen template — Safe Data API documentation (HTML).
-# Configured by doc/CMakeLists.txt (add_doxygen_target): @DOC_BASE@ and
-# @DOXY_OUT@ are substituted and the rendered doxyfile lands in the build dir.
+# Configured by the zdocs engine (@ONLY): @DOXY_SRC_DIR@ is this folder,
+# @SAFE_DATA_BASE@ the repository root (set in doc/CMakeLists.txt). zdocs
+# appends the keys it owns (HTML/XML output, tag files, theme, version).
 
 PROJECT_NAME           = "Safe Data API"
 PROJECT_BRIEF          = "CRC-protected (optionally redundant) data containers for Zephyr"
-PROJECT_NUMBER         = 0.2
 
 OUTPUT_DIRECTORY       = @DOXY_OUT@
 CREATE_SUBDIRS         = NO
 
-INPUT                  = @DOC_BASE@/_doxygen/safe-data-api-groups.dox \
-                         @DOC_BASE@/../include/safe_data/safe_data.h \
-                         @DOC_BASE@/../src/safe_data.c \
-                         @DOC_BASE@/../README.md
-USE_MDFILE_AS_MAINPAGE = @DOC_BASE@/../README.md
+INPUT                  = @DOXY_SRC_DIR@/groups.dox \
+                         @SAFE_DATA_BASE@/include/safe_data/safe_data.h \
+                         @SAFE_DATA_BASE@/src/safe_data.c \
+                         @SAFE_DATA_BASE@/README.md
+USE_MDFILE_AS_MAINPAGE = @SAFE_DATA_BASE@/README.md
 RECURSIVE              = NO
 
 # Document the full API surface: pretend every Kconfig gate is enabled, and
@@ -46,13 +46,9 @@ QUIET                  = YES
 WARN_IF_UNDOCUMENTED   = NO
 
 GENERATE_HTML          = YES
-HTML_OUTPUT            = html
 GENERATE_LATEX         = NO
-GENERATE_XML           = NO
 
-GENERATE_TREEVIEW      = YES
 SOURCE_BROWSER         = YES
 REFERENCED_BY_RELATION = YES
 REFERENCES_RELATION    = YES
 
-ALIASES                = "verifies=\xrefitem verifies \"Verifies\" \"Verified requirements\""

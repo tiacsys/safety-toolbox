@@ -1,112 +1,101 @@
 # Safe Data API — Documentation
 
-Four documents, forming the traceability chain
-**requirement → test case → test result**, plus the rendered API reference:
+Five documents form the traceability chain
+**requirement → test case → test result**, plus the rendered API reference.
+They are built by the [zdocs](https://github.com/tiacsys/zdocs) engine, a
+Zephyr module declared in the repository's `west.yml`. Every document is
+declared once in [`documents.yaml`](documents.yaml), and zdocs derives all
+cross-document links from it.
 
-| Document | Source | Built with | Content |
-|----------|--------|------------|---------|
-| Requirement specification | `requirement-specification/` | Sphinx + [sphinx-needs](https://sphinx-needs.readthedocs.io) | `SD-REQ-…` requirement items with stable IDs |
-| Test specification | `test-specification/` | Doxygen XML → Sphinx + sphinx-needs (`testmodule` directive) | `TC_…` test-case items generated from the **doxygen XML of the annotated `ZTEST()` sources**; each `verifies` requirement IDs |
-| Test report | `test-report/` | Sphinx + sphinx-needs (`testreport`/`twisterinfo` directives) | `TR-…` test-result items **derived from twister output** (`twister_report.xml`); each is the `result_of` a test case and `covers` its requirements; embeds run metadata and `handler.log` excerpts |
-| API documentation | deploy `api-documentation/` (from `safe-data-api.doxyfile.in`) | Doxygen (HTML) | Rendering of the in-source doxygen comments of `safe_data.h` / `safe_data.c` |
+| Document (registry id) | Source | Content |
+|---|---|---|
+| Requirement Specification (`requirement-specification`) | `requirement-specification/*.rst` | `SD-TOP-…` / `SD-REQ-…` sphinx-needs requirements, authored here |
+| Test Specification (`test-specification`) | the annotated `ZTEST()` sources, via `dox-safe-data-testspec` | one `TC_…` test case per ZTEST; each `verifies` requirements |
+| Test Report (`test-report`) | twister output (`twister_report.xml`, `twister.json`) | one `TR-…` result per scenario × test case; `result_of` its test case, `covers` its requirements |
+| API Reference (`dox-safe-data-api`) | `include/`, `src/`, `README.md` | Doxygen rendering of the API |
+| Test Sources (`dox-safe-data-testspec`) | `tests/safe_data/src/main.c` | Doxygen rendering of the annotated tests; its XML feeds the test specification |
 
-### Test-specification pipeline (mirrors `zephyr-safety/doc`)
+## How the chain is built
 
-1. **Doxygen first** (`safe-data-testspec.doxyfile.in` → CMake target
-   `doxygen-safe-data-testspec`): runs over the annotated test sources. The
-   `PREDEFINED` ztest-macro expansions model the test structure as **doxygen
-   groups** — every `ZTEST_SUITE()` becomes a group named after the ztest
-   suite, every `ZTEST()` a function in that group. The hierarchy above the
-   suites lives in [`_doxygen/safe-data-test-groups.dox`](_doxygen/safe-data-test-groups.dox)
-   and the test sources:
+1. **Requirements are rst.** `requirement-specification/` holds the
+   requirements as sphinx-needs directives. That is the only place they are
+   edited. The registry key `doxygen_tag:` makes zdocs publish them as a
+   Doxygen tag file too (`deploy/html/requirement-specification/needs.tag`).
+   So a `\verifies SD-REQ-…` in a test resolves against the real requirement
+   and links to its page.
+2. **Tests carry their own traceability.** Every `ZTEST()` has a Doxygen block:
 
+   ```c
+   /**
+    * @brief Initialisation seals the payload and verification passes.
+    * ...
+    * @testid{TC_SAFE_DATA_INIT_AND_VERIFY}
+    * @verifies SD-REQ-001
+    * @verifies SD-REQ-003
+    * @active
+    */
+   ZTEST(safe_data, test_init_and_verify)
    ```
-   all_tests                      (category, groups.dox)
-   └── safe_data_tests            (category, groups.dox)
-       └── safe_data_module       (test application, @defgroup in tests main.c)
-           └── safe_data          (ztest suite, via ZTEST_SUITE + @addtogroup nesting)
-   ```
 
-2. **Then Sphinx**: `.. testmodule:: safe_data_module` walks the doxygen XML
-   (`_extensions/doxygen_parser.py`) and renders one `test_case` need per
-   ZTEST, with section headings per suite, a scenario table from
-   `testcase.yaml`, and source links into the doxygen HTML.
-
-Test annotations use the zephyr-safety vocabulary: `@testid{TC_…}` (stable
-need ID), one `@reqref{SD-REQ-…}` per verified requirement,
-`@active`/`@draft`/`@obsolete` (status).
-
-The Sphinx extensions live in [`_extensions/`](_extensions/):
-`test_module.py` (testmodule/testreport/twisterinfo directives),
-`doxygen_parser.py`, `rst_builders.py`, `twister_reader.py` (ported from
-`zephyr-safety/doc/_extensions`), and `needs_common.py` (shared need/link
-types so the documents cannot diverge).
-
-## Prerequisites
-
-```sh
-python3 -m venv /workspace/.venv-docs
-/workspace/.venv-docs/bin/pip install sphinx sphinx-needs sphinx_rtd_theme pyyaml
-# doxygen must be on PATH (any recent version)
-```
+   `@testid` is the stable need id; `@verifies` is Doxygen's native command
+   (one UID per line); `@active` / `@draft` / `@obsolete` is the status.
+   A `@verifies` naming a requirement that does not exist **fails the build**
+   ("Reference to unknown requirement").
+3. **Doxygen, then Sphinx.** `dox-safe-data-testspec` renders the tests to
+   XML. The `ZTEST` macros are modelled as Doxygen groups: one group per
+   ztest suite, nested under the test application's group, as set up in
+   `dox/safe-data-testspec/groups.dox` and the test sources. In the test
+   specification, `.. testmodule:: safe_data_module` turns every test
+   function into a `test_case` need.
+4. **Twister results.** In the test report, `.. testreport::` and
+   `.. twisterinfo::` read the twister output directory and emit one
+   `test_result` need per scenario × test case.
+5. **Traceability matrix.** `test-specification/traceability.rst` renders
+   test case → requirement, the covered requirements, and the **coverage
+   gaps**.
 
 ## Build
 
-The build system is CMake ([CMakeLists.txt](CMakeLists.txt), modelled on
-`zephyr-safety/doc`): every document gets a `<name>-html` target plus a
-`<name>-html-nodeps` twin that skips the inter-document dependencies.
+From the workspace root (see the top-level `README.md` for `west init`):
 
 ```sh
-# 1. produce twister results (consumed by the test report)
-export ZEPHYR_SDK_INSTALL_DIR=/opt/toolchains/zephyr-sdk-1.0.1
-export ZEPHYR_TOOLCHAIN_VARIANT=zephyr ZEPHYR_BASE=/workspace/zephyr
-/workspace/zephyr/scripts/twister -T /workspace/safe_api/improved/tests \
-    -p native_sim --outdir /workspace/build-safe_api/twister-out
+# 1. produce the twister results the test report is built from
+west twister -T safety-toolbox/tests -p native_sim -O twister-out
 
-# 2. configure (sphinx-build from the docs venv must be on PATH)
-PATH=/workspace/.venv-docs/bin:$PATH \
-    cmake -B /workspace/build-safe_api/doc /workspace/safe_api/improved/doc
-
-# 3. build everything — or a single target, e.g. test-report-html
-cmake --build /workspace/build-safe_api/doc --target docs
+# 2. configure and build all documents; doc-check runs at the end
+cmake -S safety-toolbox/doc -B build/doc
+cmake --build build/doc
 ```
 
-Targets: `requirement-specification-html`, `test-specification-html`,
-`test-report-html`, `api-documentation-html` (Doxygen), `docs` (all of them),
-`serve`. Cache options: `-DTWISTER_OUT=…`, `-DSAFE_DATA_DOC_BASE_URL=…`,
-`-DSPHINXOPTS=…`.
+The output is the deploy tree `build/doc/deploy/html/<registry id>/`.
+Serve it from `build/doc/deploy/html/`; cross-document links assume
+`base_url` from `documents.yaml` (`http://localhost:8000/`).
 
-Outputs land in `<builddir>/deploy/<document>/html/`. Build order is encoded
-as target dependencies: the test specification imports the requirement
-specification's `needs.json` (sphinx-needs `needs_external_needs`), the test
-report imports both — that is what makes the `verifies`/`result_of`/`covers`
-links resolve across the separately built documents. The test specification
-additionally depends on the `doxygen-safe-data-testspec` target that produces
-the XML it consumes.
+Useful cache options:
 
-## View
+- `-DZDOCS_TWISTER_OUT=<dir>`: the twister output directory. The default is
+  `<workspace>/twister-out`.
+- `-DZDOCS_DOC_BASE_URL=<url>`: the URL the deploy tree is served under.
 
-Cross-document links use a common base URL (default `http://localhost:8000`,
-override with `-DSAFE_DATA_DOC_BASE_URL=…`):
+Useful targets:
 
-```sh
-cmake --build /workspace/build-safe_api/doc --target serve
-# then open http://localhost:8000/
-```
+- `doc-index`: every document's stage-1 index.
+- `<id>-html`: a single Sphinx document.
+- `<id>`: a single Doxygen document.
+- `doc-check`: re-check an existing deploy tree.
+- `clean-docs`
 
 ## Conventions
 
-- **Test annotations:** every `ZTEST()` carries a doxygen block with
-  `@brief` (title), a description, `@testid{TC_<SUITE>_<NAME>}` (the stable
-  need ID), one `@reqref{SD-REQ-…}` per verified requirement, and a status
-  tag (`@active`/`@draft`/`@obsolete`).
-- **New test application/suite:** give the application a module group
-  (`@defgroup <app>_module @ingroup safe_data_tests`) and nest each ztest
-  suite group into it (`@addtogroup <suite>` + `@ingroup <app>_module`) next
-  to its `ZTEST_SUITE()`; then add a page with
+- **Adding a requirement:** add a `.. requirement::` with an `SD-REQ-…` id
+  and a `:refines:` link to its top-level requirement in
+  `requirement-specification/detailed.rst`, then reference it from tests with
+  `@verifies`.
+- **Adding a test:** give the `ZTEST()` a Doxygen block with `@brief`,
+  a description, `@testid{TC_<SUITE>_<NAME>}`, one `@verifies` per
+  requirement, and a status tag.
+- **New test application:** give it a module group (`@defgroup <app>_module`,
+  `@ingroup safe_data_tests`), nest each ztest suite group into it, add its
+  `src/` to `dox/safe-data-testspec/Doxyfile.in`, and add a page with
   `.. testmodule:: <app>_module` to the test specification.
-- **Result IDs:** `TR-<platform>-<scenario>-<test-case-id>`, one per twister
-  scenario × test case, status `passed`/`failed`/`skipped`.
-- **Adding a requirement:** add an `SD-REQ-…` item in
-  `requirement-specification/index.rst`, reference it from the relevant test
-  annotations (`@reqref`), rebuild.
+- **Result ids:** `TR-<platform>-<scenario>-<test case id>`.

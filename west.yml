@@ -34,8 +34,9 @@ manifest:
     # is not anonymously readable. Pinned to a commit, not `main`: the
     # generated test report and traceability matrix depend on the engine's
     # exact behaviour. This commit carries the `doxygen_tag:` registry key
-    # (f735c41) and its parser fix; it resolves on GitHub once zdocs is pushed.
+    # (f735c41), its parser fix (9a25655) and the test-report rebuild fix
+    # (967d417); it resolves on GitHub once zdocs is pushed.
     - name: zdocs
       url: git@github.com:tiacsys/zdocs.git
-      revision: 9a2565581df46c17b20e8d29d10c5148d0f5c00b
+      revision: 967d41789915721619ebb17522f89f7e39951065
       path: tools/zdocs

@@ -1,0 +1,122 @@
+# Copyright (c) 2026 inovex GmbH
+# SPDX-License-Identifier: Apache-2.0
+#
+# sphinx-needs configuration shared by every document (ZDOCS_NEEDS_CONFIG).
+# Project-scoped: each document imports the needs of every needs-publishing
+# peer, and sphinx-needs rejects an imported need whose type it does not know.
+
+[needs]
+id_regex = "^[A-Za-z][A-Za-z0-9_-]*$"
+build_json = true
+
+[[needs.types]]
+directive = "top_requirement"
+title = "Top-Level Requirement"
+prefix = "SD-TOP-"
+color = "#F9D9C4"
+style = "node"
+
+[[needs.types]]
+directive = "requirement"
+title = "Requirement"
+prefix = "SD-REQ-"
+color = "#FDEBD0"
+style = "node"
+
+# The three types the testmodule/testreport directives emit, under the
+# engine's default names.
+[[needs.types]]
+directive = "test_case"
+title = "Test Case"
+prefix = "TC_"
+color = "#E2EFDA"
+style = "node"
+
+[[needs.types]]
+directive = "test_procedure"
+title = "Test Procedure"
+prefix = "TPROC_"
+color = "#D6E4F7"
+style = "node"
+
+[[needs.types]]
+directive = "test_result"
+title = "Test Result"
+prefix = "TR-"
+color = "#D6E4F7"
+style = "node"
+
+[needs.links.refines]
+description = "Detailed requirement refines a top-level requirement"
+incoming = "refined by"
+outgoing = "refines"
+
+[needs.links.verifies]
+description = "Test case verifies a requirement"
+incoming = "verified by"
+outgoing = "verifies"
+
+[needs.links.result_of]
+description = "Test result belongs to a test case"
+incoming = "results"
+outgoing = "result of"
+
+[needs.links.covers]
+description = "Test result covers a requirement"
+incoming = "covered by"
+outgoing = "covers"
+
+# The custom fields the testmodule/testreport directives attach to needs.
+[needs.fields.test_function]
+description = "C function name of the test"
+nullable = true
+[needs.fields.test_function.schema]
+type = "string"
+
+[needs.fields.test_module]
+description = "Test application path (e.g. tests/safe_data)"
+nullable = true
+[needs.fields.test_module.schema]
+type = "string"
+
+[needs.fields.suite]
+description = "ztest suite (doxygen group) name"
+nullable = true
+[needs.fields.suite.schema]
+type = "string"
+
+[needs.fields.suite_title]
+description = "Human-readable doxygen group title"
+nullable = true
+[needs.fields.suite_title.schema]
+type = "string"
+
+[needs.fields.platform]
+description = "Twister platform"
+nullable = true
+[needs.fields.platform.schema]
+type = "string"
+
+[needs.fields.scenario]
+description = "Twister scenario"
+nullable = true
+[needs.fields.scenario.schema]
+type = "string"
+
+[needs.fields.twister_id]
+description = "Full twister test case identifier"
+nullable = true
+[needs.fields.twister_id.schema]
+type = "string"
+
+[needs.fields.execution_time]
+description = "Execution time in seconds"
+nullable = true
+[needs.fields.execution_time.schema]
+type = "string"
+
+[needs.fields.reason]
+description = "Skip/failure reason"
+nullable = true
+[needs.fields.reason.schema]
+type = "string"

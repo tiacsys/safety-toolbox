@@ -8,7 +8,7 @@ call the right function at the right time.
 The repository is also a self-contained example of generated, auditable safety
 evidence. Its requirements, annotated tests and twister results are rendered
 into a requirement specification, a test specification, a test report and a
-traceability matrix (see [`doc/`](doc/README.md)).
+traceability matrix (see `doc/README.md`).
 
 ## Why
 
@@ -104,7 +104,7 @@ SAFE_SECTION(&cfg, p) {        /* p is a struct system_config * */
 The mutex embedded in each container (the default) serialises every access, so a
 reader thread can never observe a half-finished update from a writer thread — each
 `SAFE_READ` snapshot is internally consistent and CRC-valid. See
-[`samples/producer_consumer`](samples/producer_consumer) for a runnable demo: a
+`samples/producer_consumer` for a runnable demo: a
 producer mutates a multi-field struct with an invariant (`sum == x + y`) via
 `SAFE_UPDATE` while a consumer validates snapshots via `SAFE_READ`; the invariant
 holds on every read.
@@ -143,7 +143,7 @@ read/update/`SAFE_SECTION`) it means *repaired in place*.
 
 ## Workspace
 
-The repository is its own west manifest ([`west.yml`](west.yml)): Zephyr at a
+The repository is its own west manifest (`west.yml`): Zephyr at a
 release tag plus the zdocs documentation engine, nothing else.
 
 ```sh
@@ -184,7 +184,7 @@ west twister -T safety-toolbox/tests -p native_sim -O twister-out
 ```
 
 The twister output directory is also the input to the generated test report
-(see [`doc/README.md`](doc/README.md)).
+(see `doc/README.md`).
 
 ## Using the module
 

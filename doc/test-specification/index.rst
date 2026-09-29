@@ -6,7 +6,7 @@ Test cases for the Safe Data API. The content is generated from the annotated
 ztest macros are modelled as doxygen groups — one group per test application,
 one nested group per ztest suite); the ``testmodule`` directive then turns
 every test function into a sphinx-needs ``test_case`` item carrying its
-``@testid``, ``@reqref`` (→ ``verifies`` links into the *Requirement
+``@testid``, ``@verifies`` (→ ``verifies`` links into the *Requirement
 Specification*) and status annotations.
 
 .. toctree::

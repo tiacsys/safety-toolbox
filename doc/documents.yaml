@@ -1,0 +1,80 @@
+# Copyright (c) 2026 inovex GmbH
+# SPDX-License-Identifier: Apache-2.0
+#
+# Document registry for the Safe Data API documentation, read by the zdocs
+# engine. Every document is declared here once; zdocs derives all
+# cross-document links from it (intersphinx, doxylink, external needs,
+# Doxygen TAGFILES) and the navigation sidebars.
+
+base_url: "http://localhost:8000/"
+
+# Every doxygen document also writes XML (deploy/xml/<id>/). The test
+# specification parses the testspec document's XML.
+doxygen_xml: true
+
+# doc-check asserts that every bullet on this page renders as a real link.
+xref_smoketest: "html/test-report/xref-test.html"
+
+groups:
+  - id: specification
+    title: "Specification"
+  - id: verification
+    title: "Verification"
+  - id: reference
+    title: "Reference"
+
+documents:
+  # The requirements, authored in rst as sphinx-needs. `doxygen_tag` publishes
+  # them as a Doxygen tag file, so `\verifies` in the test sources and
+  # `\satisfies` in the API resolve against them and link here.
+  requirement-specification:
+    title: "Requirement Specification"
+    kind: sphinx
+    group: specification
+    prefix: req
+    builders: [html]
+    needs:
+      source: json
+    doxygen_tag:
+      types: [top_requirement, requirement]
+
+  # One test_case need per annotated ZTEST, generated from the testspec
+  # Doxygen XML by `.. testmodule::`.
+  test-specification:
+    title: "Test Specification"
+    kind: sphinx
+    group: verification
+    prefix: testspec
+    builders: [html]
+    needs:
+      source: json
+    testmodule:
+      doxygen_source: dox-safe-data-testspec
+      api_reference: dox-safe-data-api
+
+  # One test_result need per twister scenario x test case, correlated
+  # against the test specification's needs.
+  test-report:
+    title: "Test Report"
+    kind: sphinx
+    group: verification
+    prefix: testreport
+    builders: [html]
+    needs:
+      source: json
+    testmodule:
+      spec: test-specification
+
+  dox-safe-data-api:
+    title: "API Reference (Doxygen)"
+    kind: doxygen
+    group: reference
+    prefix: dox_api
+    doc_dir: dox/safe-data-api
+
+  dox-safe-data-testspec:
+    title: "Test Sources (Doxygen)"
+    kind: doxygen
+    group: reference
+    prefix: dox_testspec
+    doc_dir: dox/safe-data-testspec

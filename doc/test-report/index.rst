@@ -21,3 +21,8 @@ Results
 
 .. testreport:: twister_report.xml
    :module: safe_data.api
+
+.. toctree::
+   :hidden:
+
+   xref-test

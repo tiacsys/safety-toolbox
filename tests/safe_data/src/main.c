@@ -37,8 +37,8 @@ static void reset_to(uint32_t a, uint16_t b, uint8_t c)
  * container returns 0.
  *
  * @testid{TC_SAFE_DATA_INIT_AND_VERIFY}
- * @reqref{SD-REQ-001}
- * @reqref{SD-REQ-003}
+ * @verifies SD-REQ-001
+ * @verifies SD-REQ-003
  * @active
  */
 ZTEST(safe_data, test_init_and_verify)
@@ -54,8 +54,8 @@ ZTEST(safe_data, test_init_and_verify)
  * SAFE_READ.
  *
  * @testid{TC_SAFE_DATA_READ_ROUNDTRIP}
- * @reqref{SD-REQ-005}
- * @reqref{SD-REQ-006}
+ * @verifies SD-REQ-005
+ * @verifies SD-REQ-006
  * @active
  */
 ZTEST(safe_data, test_read_roundtrip)
@@ -76,7 +76,7 @@ ZTEST(safe_data, test_read_roundtrip)
  * the new value: the tag can never go stale across a write.
  *
  * @testid{TC_SAFE_DATA_WRITE_RESEALS}
- * @reqref{SD-REQ-006}
+ * @verifies SD-REQ-006
  * @active
  */
 ZTEST(safe_data, test_write_reseals)
@@ -115,7 +115,7 @@ static int mut_abort(void *payload, void *user)
  * the committed value is visible to the next read.
  *
  * @testid{TC_SAFE_DATA_UPDATE_COMMITS}
- * @reqref{SD-REQ-007}
+ * @verifies SD-REQ-007
  * @active
  */
 ZTEST(safe_data, test_update_commits)
@@ -137,7 +137,7 @@ ZTEST(safe_data, test_update_commits)
  * it the partial write is detectable via the (not resealed) tag.
  *
  * @testid{TC_SAFE_DATA_UPDATE_ABORT_KEEPS_INTEGRITY}
- * @reqref{SD-REQ-007}
+ * @verifies SD-REQ-007
  * @active
  */
 ZTEST(safe_data, test_update_abort_keeps_integrity)
@@ -170,7 +170,7 @@ ZTEST(safe_data, test_update_abort_keeps_integrity)
  * sealed automatically on normal scope exit and visible to the next read.
  *
  * @testid{TC_SAFE_DATA_SECTION_SCOPE}
- * @reqref{SD-REQ-021}
+ * @verifies SD-REQ-021
  * @active
  */
 ZTEST(safe_data, test_section_scope)
@@ -200,8 +200,8 @@ ZTEST(safe_data, test_section_scope)
  * repairs and reseals; without it the fault is unrecoverable.
  *
  * @testid{TC_SAFE_DATA_DETECTS_CORRUPTION}
- * @reqref{SD-REQ-003}
- * @reqref{SD-REQ-009}
+ * @verifies SD-REQ-003
+ * @verifies SD-REQ-009
  * @active
  */
 ZTEST(safe_data, test_detects_corruption)
@@ -237,8 +237,8 @@ ZTEST(safe_data, test_detects_corruption)
  * from the shadow copy in place; the container verifies clean afterwards.
  *
  * @testid{TC_SAFE_DATA_VERIFY_REPAIR_FIXES_IN_PLACE}
- * @reqref{SD-REQ-004}
- * @reqref{SD-REQ-009}
+ * @verifies SD-REQ-004
+ * @verifies SD-REQ-009
  * @active
  */
 ZTEST(safe_data, test_verify_repair_fixes_in_place)
@@ -269,7 +269,7 @@ ZTEST(safe_data, test_verify_repair_fixes_in_place)
  * CONFIG_SAFE_DATA_ALLOW_UNCHECKED_COMMIT).
  *
  * @testid{TC_SAFE_DATA_COMMIT_RESEALS_EXTERNAL_WRITE}
- * @reqref{SD-REQ-022}
+ * @verifies SD-REQ-022
  * @active
  */
 ZTEST(safe_data, test_commit_reseals_external_write)
@@ -301,7 +301,7 @@ ZTEST(safe_data, test_commit_reseals_external_write)
  * is recoverable; a locked read makes the reseal durable.
  *
  * @testid{TC_SAFE_DATA_STALE_TAG_RECOVERS}
- * @reqref{SD-REQ-009}
+ * @verifies SD-REQ-009
  * @active
  */
 ZTEST(safe_data, test_stale_tag_recovers)
@@ -334,7 +334,7 @@ ZTEST(safe_data, test_stale_tag_recovers)
  * the data: verification reports -EILSEQ.
  *
  * @testid{TC_SAFE_DATA_DOUBLE_FAULT_UNRECOVERABLE}
- * @reqref{SD-REQ-010}
+ * @verifies SD-REQ-010
  * @active
  */
 ZTEST(safe_data, test_double_fault_unrecoverable)
@@ -365,7 +365,7 @@ ZTEST(safe_data, test_double_fault_unrecoverable)
  * payloads with -EINVAL (a NULL lock is legal: locking is optional).
  *
  * @testid{TC_SAFE_DATA_NULL_ARGS}
- * @reqref{SD-REQ-002}
+ * @verifies SD-REQ-002
  * @active
  */
 ZTEST(safe_data, test_null_args)
@@ -476,7 +476,7 @@ static void cc_consumer(void *a, void *b, void *c)
  * a snapshot violating the payload invariant.
  *
  * @testid{TC_SAFE_DATA_CONCURRENT_ACCESS_IS_SERIALISED}
- * @reqref{SD-REQ-016}
+ * @verifies SD-REQ-016
  * @active
  */
 ZTEST(safe_data, test_concurrent_access_is_serialised)
@@ -515,7 +515,7 @@ ZTEST(safe_data, test_concurrent_access_is_serialised)
  * a seal/corrupt/detect(/recover) round trip on a scratch container.
  *
  * @testid{TC_SAFE_DATA_SELFTEST}
- * @reqref{SD-REQ-017}
+ * @verifies SD-REQ-017
  * @active
  */
 ZTEST(safe_data, test_selftest)
@@ -534,7 +534,7 @@ ZTEST(safe_data, test_selftest)
  * their dedicated counter exactly once per detection.
  *
  * @testid{TC_SAFE_DATA_STATS_COUNT_EVENTS}
- * @reqref{SD-REQ-012}
+ * @verifies SD-REQ-012
  * @active
  */
 ZTEST(safe_data, test_stats_count_events)
@@ -601,8 +601,8 @@ static void fault_event_cb_other(const struct safe_data_fault_info *info)
  * event descriptor.
  *
  * @testid{TC_SAFE_DATA_FAULT_HANDLER_EVENTS}
- * @reqref{SD-REQ-013}
- * @reqref{SD-REQ-011}
+ * @verifies SD-REQ-013
+ * @verifies SD-REQ-011
  * @active
  */
 ZTEST(safe_data, test_fault_handler_events)
@@ -658,7 +658,7 @@ static int mut_positive(void *payload, void *user)
  * violation is counted.
  *
  * @testid{TC_SAFE_DATA_UPDATE_CLAMPS_POSITIVE_MUTATOR_RETURN}
- * @reqref{SD-REQ-008}
+ * @verifies SD-REQ-008
  * @active
  */
 ZTEST(safe_data, test_update_clamps_positive_mutator_return)
@@ -694,7 +694,7 @@ ZTEST(safe_data, test_update_clamps_positive_mutator_return)
  * succeeds, but the destroyed evidence is counted in the statistics first.
  *
  * @testid{TC_SAFE_DATA_WRITE_OBSERVES_OVERWRITTEN_CORRUPTION}
- * @reqref{SD-REQ-018}
+ * @verifies SD-REQ-018
  * @active
  */
 ZTEST(safe_data, test_write_observes_overwritten_corruption)
@@ -747,7 +747,7 @@ static void holder_fn(void *a, void *b, void *c)
  * counted; the container is usable again after the holder releases.
  *
  * @testid{TC_SAFE_DATA_LOCK_TIMEOUT_IS_BOUNDED_AND_REPORTED}
- * @reqref{SD-REQ-014}
+ * @verifies SD-REQ-014
  * @active
  */
 ZTEST(safe_data, test_lock_timeout_is_bounded_and_reported)
