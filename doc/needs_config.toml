@@ -8,6 +8,9 @@
 [needs]
 id_regex = "^[A-Za-z][A-Za-z0-9_-]*$"
 build_json = true
+# Byte-identical needs.json across rebuilds of the same sources: no file- or
+# version-level timestamps. The exports are hashed downstream (evidence graph).
+reproducible_json = true
 
 [[needs.types]]
 directive = "top_requirement"
