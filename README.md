@@ -5,9 +5,10 @@ integrity tag (CRC), an optional redundant shadow copy, and a mutex — so that
 data integrity is guaranteed *by construction* rather than by remembering to
 call the right function at the right time.
 
-It is a hardened redesign of the `../safe_api.{c,h}` prototype; see
-[`../PLAN.md`](../PLAN.md) for the review of the original and the rationale
-behind each change.
+The repository is also a self-contained example of generated, auditable safety
+evidence. Its requirements, annotated tests and twister results are rendered
+into a requirement specification, a test specification, a test report and a
+traceability matrix (see [`doc/`](doc/README.md)).
 
 ## Why
 
@@ -32,6 +33,8 @@ samples/config_guard            copy-in/out style; corruption -> recover default
 samples/transaction             atomic RMW, scoped section, shadow recovery
 samples/producer_consumer       two threads share one struct; lock prevents torn reads
 tests/safe_data                 ztest suite (incl. a concurrency test)
+doc/                            requirements, test specification, test report
+west.yml                        standalone workspace manifest
 ```
 
 ## Usage
@@ -138,35 +141,57 @@ args, `SAFE_DATA_RECOVERED` (`-EAGAIN`) for a shadow-coverable fault — from
 from `safe_data_verify_repair()` (lock-held, used internally by
 read/update/`SAFE_SECTION`) it means *repaired in place*.
 
-## Build & run (native_sim)
+## Workspace
+
+The repository is its own west manifest ([`west.yml`](west.yml)): Zephyr at a
+release tag plus the zdocs documentation engine, nothing else.
 
 ```sh
-export ZEPHYR_SDK_INSTALL_DIR=/opt/toolchains/zephyr-sdk-1.0.1
-export ZEPHYR_TOOLCHAIN_VARIANT=zephyr ZEPHYR_BASE=/workspace/zephyr
-
-# samples are self-contained apps (they add this dir as a module automatically)
-west build -p always -b native_sim -d build-safe_api/transaction \
-     /workspace/safe_api/improved/samples/transaction
-build-safe_api/transaction/zephyr/zephyr.exe        # Ctrl-C to stop (idles after main)
-
-# two-thread demo (producer/consumer over one protected struct)
-west build -p always -b native_sim -d build-safe_api/producer_consumer \
-     /workspace/safe_api/improved/samples/producer_consumer
-build-safe_api/producer_consumer/zephyr/zephyr.exe  # Ctrl-C to stop (idles after main)
-
-# tests (the suite exits on its own, so no Ctrl-C needed)
-west build -p always -b native_sim -d build-safe_api/tests \
-     /workspace/safe_api/improved/tests/safe_data
-build-safe_api/tests/zephyr/zephyr.exe
-# the no-shadow detection-only paths are a second twister scenario; build them
-# directly with: west build ... -- -DCONFIG_SAFE_DATA_REDUNDANT=n
+west init -m git@github.com:tiacsys/safety-toolbox.git toolbox-ws
+cd toolbox-ws
+west update
+west zephyr-export
+pip install -r zephyr/scripts/requirements.txt
 ```
 
-To use the library from your own application, add it as a module:
+All commands below run from the workspace root (`toolbox-ws/`).
+
+## Build & run (native_sim)
+
+The samples are self-contained applications and add this repository as a
+module themselves. On a 64-bit host without 32-bit multilib (e.g. aarch64),
+use `native_sim/native/64` in place of `native_sim`.
 
 ```sh
-west build -b <board> <app> -- \
-     -DEXTRA_ZEPHYR_MODULES=/workspace/safe_api/improved
+# atomic read-modify-write, scoped section, shadow recovery
+west build -p always -b native_sim -d build/transaction \
+     safety-toolbox/samples/transaction
+build/transaction/zephyr/zephyr.exe          # Ctrl-C to stop (idles after main)
+
+# two threads sharing one protected struct
+west build -p always -b native_sim -d build/producer_consumer \
+     safety-toolbox/samples/producer_consumer
+build/producer_consumer/zephyr/zephyr.exe    # Ctrl-C to stop (idles after main)
+```
+
+## Tests
+
+The ztest suite has four twister scenarios (default, detection-only without
+the shadow copy, bounded locking, and the STRICT preset):
+
+```sh
+west twister -T safety-toolbox/tests -p native_sim -O twister-out
+```
+
+The twister output directory is also the input to the generated test report
+(see [`doc/README.md`](doc/README.md)).
+
+## Using the module
+
+Add the repository to your own manifest, or pass it on the command line:
+
+```sh
+west build -b <board> <app> -- -DEXTRA_ZEPHYR_MODULES=<path to safety-toolbox>
 ```
 
 ## Limitations / notes

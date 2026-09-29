@@ -4,6 +4,7 @@ tests:
   safe_data.api:
     platform_allow:
       - native_sim
+      - native_sim/native/64
     tags:
       - safe_data
     extra_configs:
@@ -14,6 +15,7 @@ tests:
   safe_data.api.plain:
     platform_allow:
       - native_sim
+      - native_sim/native/64
     tags:
       - safe_data
     extra_configs:
@@ -24,6 +26,7 @@ tests:
   safe_data.api.timeout:
     platform_allow:
       - native_sim
+      - native_sim/native/64
     tags:
       - safe_data
     extra_configs:
@@ -34,6 +37,7 @@ tests:
   safe_data.api.strict:
     platform_allow:
       - native_sim
+      - native_sim/native/64
     tags:
       - safe_data
     extra_configs:

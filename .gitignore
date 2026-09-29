@@ -1,0 +1,7 @@
+# Python bytecode (the docs build writes it next to the extensions)
+__pycache__/
+*.pyc
+
+# Build and test output
+build*/
+twister-out*/

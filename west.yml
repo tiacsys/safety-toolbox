@@ -1,0 +1,41 @@
+# Copyright (c) 2026 inovex GmbH
+# SPDX-License-Identifier: Apache-2.0
+#
+# Standalone west manifest for the safe_data module and its documentation.
+#
+#   west init -m git@github.com:tiacsys/safety-toolbox.git toolbox-ws
+#   cd toolbox-ws && west update
+#
+# The workspace then holds exactly three projects: this repository, Zephyr and the
+# zdocs documentation engine. That is all the module, its samples, its twister
+# tests and its generated documentation need.
+
+manifest:
+  version: "0.13"
+
+  remotes:
+    - name: zephyrproject
+      url-base: https://github.com/zephyrproject-rtos
+
+  self:
+    path: safety-toolbox
+
+  projects:
+    # Upstream Zephyr at a release tag. safe_data uses only standard kernel,
+    # CRC, logging and ztest APIs. No `import:` key: no HAL or other module is
+    # needed for native_sim. Without `import:` west does not see Zephyr's own
+    # extension commands (build, twister, ...), so they are named here.
+    - name: zephyr
+      remote: zephyrproject
+      revision: v4.4.1
+      west-commands: scripts/west-commands.yml
+
+    # The documentation engine (a Zephyr module). SSH, because the repository
+    # is not anonymously readable. Pinned to a commit, not `main`: the
+    # generated test report and traceability matrix depend on the engine's
+    # exact behaviour. This commit carries the `doxygen_tag:` registry key
+    # (f735c41) and its parser fix; it resolves on GitHub once zdocs is pushed.
+    - name: zdocs
+      url: git@github.com:tiacsys/zdocs.git
+      revision: 9a2565581df46c17b20e8d29d10c5148d0f5c00b
+      path: tools/zdocs
