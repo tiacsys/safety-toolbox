@@ -184,7 +184,9 @@ west twister -T safety-toolbox/tests -p native_sim -O twister-out
 ```
 
 The twister output directory is also the input to the generated test report
-(see `doc/README.md`).
+(see `doc/README.md`). The report build takes it as `-DZDOCS_TWISTER_OUT=<dir>`.
+Without a toolchain, pass the committed fixture `doc/_fixtures/twister`; after
+a fresh run, pass that run's output directory instead.
 
 ## Using the module
 

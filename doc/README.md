@@ -85,7 +85,9 @@ Serve it from `build/doc/deploy/html/`; cross-document links assume
 Useful cache options:
 
 - `-DZDOCS_TWISTER_OUT=<dir>`: the twister output directory. The default is
-  `<workspace>/twister-out`.
+  `<workspace>/twister-out`. Without a toolchain, use the committed fixture
+  `-DZDOCS_TWISTER_OUT=<workspace>/safety-toolbox/doc/_fixtures/twister`
+  (see its `README.md`).
 - `-DZDOCS_DOC_BASE_URL=<url>`: the URL the deploy tree is served under.
 
 Useful targets:

@@ -1,0 +1,105 @@
+<testsuites>
+	<testsuite name="native_sim/native/64" timestamp="2026-09-29T20:25:34.454591" time="0.12000000000000001" tests="76" failures="0" errors="0" skipped="11">
+		<properties>
+			<property name="version" value="v4.4.0-13461-g77e25d8f3cb2" />
+		</properties>
+		<testcase classname="safe_data.api" name="safe_data.api.safe_data.lock_timeout_is_bounded_and_reported" time="0">
+			<skipped type="skipped" message="ztest skip" />
+		</testcase>
+		<testcase classname="safe_data.api" name="safe_data.api.safe_data.write_observes_overwritten_corruption" time="0">
+			<skipped type="skipped" message="ztest skip" />
+		</testcase>
+		<testcase classname="safe_data.api" name="safe_data.api.safe_data.update_clamps_positive_mutator_return" time="0.00" />
+		<testcase classname="safe_data.api" name="safe_data.api.safe_data.fault_handler_events" time="0.00" />
+		<testcase classname="safe_data.api" name="safe_data.api.safe_data.stats_count_events" time="0.00" />
+		<testcase classname="safe_data.api" name="safe_data.api.safe_data.selftest" time="0.00" />
+		<testcase classname="safe_data.api" name="safe_data.api.safe_data.concurrent_access_is_serialised" time="0.00" />
+		<testcase classname="safe_data.api" name="safe_data.api.safe_data.null_args" time="0.00" />
+		<testcase classname="safe_data.api" name="safe_data.api.safe_data.double_fault_unrecoverable" time="0.00" />
+		<testcase classname="safe_data.api" name="safe_data.api.safe_data.stale_tag_recovers" time="0.00" />
+		<testcase classname="safe_data.api" name="safe_data.api.safe_data.commit_reseals_external_write" time="0.00" />
+		<testcase classname="safe_data.api" name="safe_data.api.safe_data.verify_repair_fixes_in_place" time="0.00" />
+		<testcase classname="safe_data.api" name="safe_data.api.safe_data.detects_corruption" time="0.00" />
+		<testcase classname="safe_data.api" name="safe_data.api.safe_data.section_scope" time="0.00" />
+		<testcase classname="safe_data.api" name="safe_data.api.safe_data.update_abort_keeps_integrity" time="0.00" />
+		<testcase classname="safe_data.api" name="safe_data.api.safe_data.update_commits" time="0.00" />
+		<testcase classname="safe_data.api" name="safe_data.api.safe_data.write_reseals" time="0.00" />
+		<testcase classname="safe_data.api" name="safe_data.api.safe_data.read_roundtrip" time="0.00" />
+		<testcase classname="safe_data.api" name="safe_data.api.safe_data.init_and_verify" time="0.00" />
+		<testcase classname="safe_data.api.plain" name="safe_data.api.plain.safe_data.lock_timeout_is_bounded_and_reported" time="0">
+			<skipped type="skipped" message="ztest skip" />
+		</testcase>
+		<testcase classname="safe_data.api.plain" name="safe_data.api.plain.safe_data.write_observes_overwritten_corruption" time="0">
+			<skipped type="skipped" message="ztest skip" />
+		</testcase>
+		<testcase classname="safe_data.api.plain" name="safe_data.api.plain.safe_data.update_clamps_positive_mutator_return" time="0.00" />
+		<testcase classname="safe_data.api.plain" name="safe_data.api.plain.safe_data.fault_handler_events" time="0.00" />
+		<testcase classname="safe_data.api.plain" name="safe_data.api.plain.safe_data.stats_count_events" time="0.00" />
+		<testcase classname="safe_data.api.plain" name="safe_data.api.plain.safe_data.selftest" time="0.00" />
+		<testcase classname="safe_data.api.plain" name="safe_data.api.plain.safe_data.concurrent_access_is_serialised" time="0.00" />
+		<testcase classname="safe_data.api.plain" name="safe_data.api.plain.safe_data.null_args" time="0.00" />
+		<testcase classname="safe_data.api.plain" name="safe_data.api.plain.safe_data.double_fault_unrecoverable" time="0">
+			<skipped type="skipped" message="ztest skip" />
+		</testcase>
+		<testcase classname="safe_data.api.plain" name="safe_data.api.plain.safe_data.stale_tag_recovers" time="0">
+			<skipped type="skipped" message="ztest skip" />
+		</testcase>
+		<testcase classname="safe_data.api.plain" name="safe_data.api.plain.safe_data.commit_reseals_external_write" time="0.00" />
+		<testcase classname="safe_data.api.plain" name="safe_data.api.plain.safe_data.verify_repair_fixes_in_place" time="0">
+			<skipped type="skipped" message="ztest skip" />
+		</testcase>
+		<testcase classname="safe_data.api.plain" name="safe_data.api.plain.safe_data.detects_corruption" time="0.00" />
+		<testcase classname="safe_data.api.plain" name="safe_data.api.plain.safe_data.section_scope" time="0.00" />
+		<testcase classname="safe_data.api.plain" name="safe_data.api.plain.safe_data.update_abort_keeps_integrity" time="0.00" />
+		<testcase classname="safe_data.api.plain" name="safe_data.api.plain.safe_data.update_commits" time="0.00" />
+		<testcase classname="safe_data.api.plain" name="safe_data.api.plain.safe_data.write_reseals" time="0.00" />
+		<testcase classname="safe_data.api.plain" name="safe_data.api.plain.safe_data.read_roundtrip" time="0.00" />
+		<testcase classname="safe_data.api.plain" name="safe_data.api.plain.safe_data.init_and_verify" time="0.00" />
+		<testcase classname="safe_data.api.timeout" name="safe_data.api.timeout.safe_data.lock_timeout_is_bounded_and_reported" time="0.21" />
+		<testcase classname="safe_data.api.timeout" name="safe_data.api.timeout.safe_data.write_observes_overwritten_corruption" time="0">
+			<skipped type="skipped" message="ztest skip" />
+		</testcase>
+		<testcase classname="safe_data.api.timeout" name="safe_data.api.timeout.safe_data.update_clamps_positive_mutator_return" time="0.00" />
+		<testcase classname="safe_data.api.timeout" name="safe_data.api.timeout.safe_data.fault_handler_events" time="0.00" />
+		<testcase classname="safe_data.api.timeout" name="safe_data.api.timeout.safe_data.stats_count_events" time="0.00" />
+		<testcase classname="safe_data.api.timeout" name="safe_data.api.timeout.safe_data.selftest" time="0.00" />
+		<testcase classname="safe_data.api.timeout" name="safe_data.api.timeout.safe_data.concurrent_access_is_serialised" time="0.00" />
+		<testcase classname="safe_data.api.timeout" name="safe_data.api.timeout.safe_data.null_args" time="0.00" />
+		<testcase classname="safe_data.api.timeout" name="safe_data.api.timeout.safe_data.double_fault_unrecoverable" time="0.00" />
+		<testcase classname="safe_data.api.timeout" name="safe_data.api.timeout.safe_data.stale_tag_recovers" time="0.00" />
+		<testcase classname="safe_data.api.timeout" name="safe_data.api.timeout.safe_data.commit_reseals_external_write" time="0.00" />
+		<testcase classname="safe_data.api.timeout" name="safe_data.api.timeout.safe_data.verify_repair_fixes_in_place" time="0.00" />
+		<testcase classname="safe_data.api.timeout" name="safe_data.api.timeout.safe_data.detects_corruption" time="0.00" />
+		<testcase classname="safe_data.api.timeout" name="safe_data.api.timeout.safe_data.section_scope" time="0.00" />
+		<testcase classname="safe_data.api.timeout" name="safe_data.api.timeout.safe_data.update_abort_keeps_integrity" time="0.00" />
+		<testcase classname="safe_data.api.timeout" name="safe_data.api.timeout.safe_data.update_commits" time="0.00" />
+		<testcase classname="safe_data.api.timeout" name="safe_data.api.timeout.safe_data.write_reseals" time="0.00" />
+		<testcase classname="safe_data.api.timeout" name="safe_data.api.timeout.safe_data.read_roundtrip" time="0.00" />
+		<testcase classname="safe_data.api.timeout" name="safe_data.api.timeout.safe_data.init_and_verify" time="0.00" />
+		<testcase classname="safe_data.api.strict" name="safe_data.api.strict.safe_data.lock_timeout_is_bounded_and_reported" time="0">
+			<skipped type="skipped" message="ztest skip" />
+		</testcase>
+		<testcase classname="safe_data.api.strict" name="safe_data.api.strict.safe_data.write_observes_overwritten_corruption" time="0.00" />
+		<testcase classname="safe_data.api.strict" name="safe_data.api.strict.safe_data.update_clamps_positive_mutator_return" time="0.00" />
+		<testcase classname="safe_data.api.strict" name="safe_data.api.strict.safe_data.fault_handler_events" time="0.00" />
+		<testcase classname="safe_data.api.strict" name="safe_data.api.strict.safe_data.stats_count_events" time="0.00" />
+		<testcase classname="safe_data.api.strict" name="safe_data.api.strict.safe_data.selftest" time="0.00" />
+		<testcase classname="safe_data.api.strict" name="safe_data.api.strict.safe_data.concurrent_access_is_serialised" time="0.00" />
+		<testcase classname="safe_data.api.strict" name="safe_data.api.strict.safe_data.null_args" time="0.00" />
+		<testcase classname="safe_data.api.strict" name="safe_data.api.strict.safe_data.double_fault_unrecoverable" time="0.00" />
+		<testcase classname="safe_data.api.strict" name="safe_data.api.strict.safe_data.stale_tag_recovers" time="0.00" />
+		<testcase classname="safe_data.api.strict" name="safe_data.api.strict.safe_data.commit_reseals_external_write" time="0">
+			<skipped type="skipped" message="ztest skip" />
+		</testcase>
+		<testcase classname="safe_data.api.strict" name="safe_data.api.strict.safe_data.verify_repair_fixes_in_place" time="0.00" />
+		<testcase classname="safe_data.api.strict" name="safe_data.api.strict.safe_data.detects_corruption" time="0.00" />
+		<testcase classname="safe_data.api.strict" name="safe_data.api.strict.safe_data.section_scope" time="0">
+			<skipped type="skipped" message="ztest skip" />
+		</testcase>
+		<testcase classname="safe_data.api.strict" name="safe_data.api.strict.safe_data.update_abort_keeps_integrity" time="0.00" />
+		<testcase classname="safe_data.api.strict" name="safe_data.api.strict.safe_data.update_commits" time="0.00" />
+		<testcase classname="safe_data.api.strict" name="safe_data.api.strict.safe_data.write_reseals" time="0.00" />
+		<testcase classname="safe_data.api.strict" name="safe_data.api.strict.safe_data.read_roundtrip" time="0.00" />
+		<testcase classname="safe_data.api.strict" name="safe_data.api.strict.safe_data.init_and_verify" time="0.00" />
+	</testsuite>
+</testsuites>
