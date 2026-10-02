@@ -213,9 +213,9 @@ Timing and execution-context safety (SD-TOP-005)
    :tags: timing, defensive
    :refines: SD-TOP-005
 
-   The locking entry points are not ISR-safe. Calling them from interrupt
-   context shall be caught by an assertion (``CONFIG_ASSERT``) instead of
-   producing undefined kernel behaviour.
+   The locking entry points are not ISR-safe. Where ``CONFIG_ASSERT`` is
+   enabled, calling them from interrupt context shall be caught by an
+   assertion instead of producing undefined kernel behaviour.
 
 Defensive interface (SD-TOP-006)
 ================================
