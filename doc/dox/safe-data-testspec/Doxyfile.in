@@ -17,7 +17,8 @@ CREATE_SUBDIRS         = NO
 
 INPUT                  = @DOXY_SRC_DIR@/mainpage.md \
                          @DOXY_SRC_DIR@/groups.dox \
-                         @SAFE_DATA_BASE@/tests/safe_data/src/main.c
+                         @SAFE_DATA_BASE@/tests/safe_data/src/main.c \
+                         @SAFE_DATA_BASE@/tests/safe_data_fault/src/main.c
 USE_MDFILE_AS_MAINPAGE = @DOXY_SRC_DIR@/mainpage.md
 RECURSIVE              = NO
 

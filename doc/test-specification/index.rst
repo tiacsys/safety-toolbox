@@ -13,4 +13,5 @@ Specification*) and status annotations.
    :maxdepth: 2
 
    safe_data/test-spec
+   safe_data_fault/test-spec
    traceability

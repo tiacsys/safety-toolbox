@@ -1,0 +1,32 @@
+tests:
+  # Unrecoverable-fault reaction RETURN: the caller gets -EILSEQ, no handler.
+  safe_data.fault.return:
+    platform_allow:
+      - native_sim
+      - native_sim/native/64
+    tags:
+      - safe_data
+    extra_configs:
+      - CONFIG_SAFE_DATA_FAULT_RETURN=y
+
+  # Reaction HANDLER: safe_data_fault_handler() runs, then -EILSEQ returns.
+  safe_data.fault.handler:
+    platform_allow:
+      - native_sim
+      - native_sim/native/64
+    tags:
+      - safe_data
+    extra_configs:
+      - CONFIG_SAFE_DATA_FAULT_HANDLER=y
+
+  # Reaction PANIC: k_panic(). The test expects the panic, so twister must
+  # not count the fatal-error line as a failure.
+  safe_data.fault.panic:
+    platform_allow:
+      - native_sim
+      - native_sim/native/64
+    tags:
+      - safe_data
+    ignore_faults: true
+    extra_configs:
+      - CONFIG_SAFE_DATA_FAULT_PANIC=y

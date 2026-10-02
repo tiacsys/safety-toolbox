@@ -33,7 +33,10 @@ Implementation → requirement
 ============================
 
 API symbols (``impl`` needs from the *API Traceability*) and the requirements
-they satisfy (``@satisfies`` in ``include/safe_data/safe_data.h``):
+they satisfy (``@satisfies`` in ``include/safe_data/safe_data.h``). A
+requirement that constrains the whole API (argument validation, fault
+reaction, bounded locking, the ISR check, serialised access, the reduced API
+surface) is traced to each public symbol that contains the behaviour:
 
 .. needtable::
    :types: impl
@@ -47,10 +50,7 @@ Requirements satisfied by an API symbol:
    :columns: id, title, satisfies_back
    :style: table
 
-Requirements not satisfied by a single API symbol. These constrain the whole
-API (argument validation, fault reaction, bounded locking, ISR restrictions,
-serialised access, the Strict API surface) and are left for a design-level
-trace on purpose:
+Requirements that no API symbol satisfies:
 
 .. needtable::
    :filter: type == "requirement" and not satisfies_back

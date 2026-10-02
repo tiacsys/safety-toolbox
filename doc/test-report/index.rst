@@ -11,16 +11,26 @@ scenario's configuration (e.g. recovery tests in the ``plain`` scenario, the
 lock-timeout test outside the ``timeout`` scenario) — see the scenario table
 in the test specification.
 
+The results come from two test applications: ``tests/safe_data`` (scenarios
+``safe_data.api.*``) and ``tests/safe_data_fault`` (scenarios
+``safe_data.fault.*``, one per unrecoverable-fault reaction).
+
 Test run
 ========
 
 .. twisterinfo:: twister.json
 
-Results
-=======
+Results: Safe Data Test Application
+====================================
 
 .. testreport:: twister_report.xml
    :module: safe_data.api
+
+Results: Safe Data Fault-Reaction Test Application
+===================================================
+
+.. testreport:: twister_report.xml
+   :module: safe_data.fault
 
 .. toctree::
    :hidden:
