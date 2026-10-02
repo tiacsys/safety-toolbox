@@ -371,11 +371,21 @@ ZTEST(safe_data, test_double_fault_unrecoverable)
 #endif
 }
 
+static int mut_noop(void *payload, void *user)
+{
+	ARG_UNUSED(payload);
+	ARG_UNUSED(user);
+	return 0;
+}
+
 /**
  * @brief NULL and zero-size arguments are rejected
  *
  * Every API entry point rejects missing required pointers and zero-length
- * payloads with -EINVAL (a NULL lock is legal: locking is optional).
+ * payloads with -EINVAL (a NULL lock is legal: locking is optional). Each
+ * entry point is called once per required pointer and once with a zero
+ * length; the locked entry points are also called with a NULL lock and valid
+ * arguments, which must succeed.
  *
  * @testid{TC_SAFE_DATA_NULL_ARGS}
  * @verifies SD-REQ-002
@@ -385,31 +395,66 @@ ZTEST(safe_data, test_null_args)
 {
 	uint32_t crc = 0;
 	uint8_t buf[4] = {0};
+	uint8_t in[4] = {1, 2, 3, 4};
 	uint8_t out[4] = {0};
+	const size_t n = sizeof(buf);
 
-	/* A NULL lock is allowed (locking optional); NULL payload/crc is not. */
-	zassert_ok(safe_data_init(NULL, buf, sizeof(buf), &crc, NULL),
-		   "NULL lock must be accepted");
-	zassert_equal(safe_data_init(NULL, NULL, sizeof(buf), &crc, NULL),
-		      -EINVAL);
+	/* init: payload and crc required, len > 0; a NULL lock is accepted. */
+	zassert_equal(safe_data_init(NULL, NULL, n, &crc, NULL), -EINVAL);
+	zassert_equal(safe_data_init(NULL, buf, n, NULL, NULL), -EINVAL);
 	zassert_equal(safe_data_init(NULL, buf, 0, &crc, NULL), -EINVAL);
-	zassert_equal(safe_data_verify(NULL, sizeof(buf), crc, NULL), -EINVAL);
-	zassert_equal(safe_data_verify(buf, 0, crc, NULL), -EINVAL);
+	zassert_ok(safe_data_init(NULL, buf, n, &crc, NULL),
+		   "NULL lock must be accepted");
 
-	/* The remaining entry points must reject their required NULL args too. */
-	zassert_equal(safe_data_read(NULL, buf, sizeof(buf), &crc, NULL, NULL),
-		      -EINVAL, "read needs an out buffer");
-	zassert_equal(safe_data_read(NULL, NULL, sizeof(buf), &crc, NULL, out),
-		      -EINVAL);
-	zassert_equal(safe_data_write(NULL, buf, sizeof(buf), &crc, NULL, NULL),
-		      -EINVAL, "write needs an input buffer");
-	zassert_equal(safe_data_update(NULL, buf, sizeof(buf), &crc, NULL, NULL,
-				       NULL),
+	/* verify and verify_repair: payload required, len > 0. */
+	zassert_equal(safe_data_verify(NULL, n, crc, NULL), -EINVAL);
+	zassert_equal(safe_data_verify(buf, 0, crc, NULL), -EINVAL);
+	zassert_equal(safe_data_verify_repair(NULL, n, crc, NULL), -EINVAL);
+	zassert_equal(safe_data_verify_repair(buf, 0, crc, NULL), -EINVAL);
+
+	/* read: payload, crc and out required, len > 0. */
+	zassert_equal(safe_data_read(NULL, NULL, n, &crc, NULL, out), -EINVAL);
+	zassert_equal(safe_data_read(NULL, buf, n, NULL, NULL, out), -EINVAL);
+	zassert_equal(safe_data_read(NULL, buf, n, &crc, NULL, NULL), -EINVAL,
+		      "read needs an out buffer");
+	zassert_equal(safe_data_read(NULL, buf, 0, &crc, NULL, out), -EINVAL);
+
+	/* write: payload, crc and in required, len > 0. */
+	zassert_equal(safe_data_write(NULL, NULL, n, &crc, NULL, in), -EINVAL);
+	zassert_equal(safe_data_write(NULL, buf, n, NULL, NULL, in), -EINVAL);
+	zassert_equal(safe_data_write(NULL, buf, n, &crc, NULL, NULL), -EINVAL,
+		      "write needs an input buffer");
+	zassert_equal(safe_data_write(NULL, buf, 0, &crc, NULL, in), -EINVAL);
+
+	/* update: payload, crc and mutator required, len > 0. */
+	zassert_equal(safe_data_update(NULL, NULL, n, &crc, NULL, mut_noop,
+				       NULL), -EINVAL);
+	zassert_equal(safe_data_update(NULL, buf, n, NULL, NULL, mut_noop,
+				       NULL), -EINVAL);
+	zassert_equal(safe_data_update(NULL, buf, n, &crc, NULL, NULL, NULL),
 		      -EINVAL, "update needs a mutator");
+	zassert_equal(safe_data_update(NULL, buf, 0, &crc, NULL, mut_noop,
+				       NULL), -EINVAL);
+
 #if defined(CONFIG_SAFE_DATA_ALLOW_UNCHECKED_COMMIT)
-	zassert_equal(safe_data_commit(NULL, NULL, sizeof(buf), &crc, NULL),
-		      -EINVAL);
+	/* commit: payload and crc required, len > 0. */
+	zassert_equal(safe_data_commit(NULL, NULL, n, &crc, NULL), -EINVAL);
+	zassert_equal(safe_data_commit(NULL, buf, n, NULL, NULL), -EINVAL);
+	zassert_equal(safe_data_commit(NULL, buf, 0, &crc, NULL), -EINVAL);
 #endif
+
+	/* stats_get: out required (with or without CONFIG_SAFE_DATA_STATS). */
+	zassert_equal(safe_data_stats_get(NULL), -EINVAL);
+
+	/* A NULL lock selects the lock-free mode: valid calls succeed. */
+	zassert_ok(safe_data_write(NULL, buf, n, &crc, NULL, in));
+	zassert_ok(safe_data_read(NULL, buf, n, &crc, NULL, out));
+	zassert_mem_equal(out, in, n);
+	zassert_ok(safe_data_update(NULL, buf, n, &crc, NULL, mut_noop, NULL));
+#if defined(CONFIG_SAFE_DATA_ALLOW_UNCHECKED_COMMIT)
+	zassert_ok(safe_data_commit(NULL, buf, n, &crc, NULL));
+#endif
+	zassert_ok(safe_data_verify(buf, n, crc, NULL));
 }
 
 /* ----------------------------------------------------------------------- *

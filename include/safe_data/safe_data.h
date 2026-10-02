@@ -199,6 +199,7 @@ struct safe_data_stats {
  * @param out Destination for the counter snapshot.
  * @return 0 on success, -EINVAL on NULL, -ENOTSUP without CONFIG_SAFE_DATA_STATS.
  *
+ * @satisfies SD-REQ-002
  * @satisfies SD-REQ-012
  */
 int safe_data_stats_get(struct safe_data_stats *out);
@@ -257,6 +258,7 @@ int safe_data_selftest_result(void);
  * @param shadow  Redundant shadow buffer of @p len bytes, or NULL if disabled.
  * @return 0 on success, -EINVAL on bad arguments.
  *
+ * @satisfies SD-REQ-002
  * @satisfies SD-REQ-001
  */
 int safe_data_init(struct k_mutex *lock, void *payload, size_t len,
@@ -276,6 +278,7 @@ int safe_data_init(struct k_mutex *lock, void *payload, size_t len,
  *         from the shadow copy (payload untouched), -EILSEQ if corrupt and
  *         unrecoverable, -EINVAL on bad args.
  *
+ * @satisfies SD-REQ-002
  * @satisfies SD-REQ-003
  */
 int safe_data_verify(const void *payload, size_t len, uint32_t crc,
@@ -298,6 +301,7 @@ int safe_data_verify(const void *payload, size_t len, uint32_t crc,
  *         from the shadow copy (reseal required), -EILSEQ if corrupt and
  *         unrecoverable, -EINVAL on bad args.
  *
+ * @satisfies SD-REQ-002
  * @satisfies SD-REQ-004
  * @satisfies SD-REQ-009
  * @satisfies SD-REQ-010
@@ -320,6 +324,7 @@ int safe_data_verify_repair(void *payload, size_t len, uint32_t crc,
  * @return 0 on success (incl. recovered), -EILSEQ if unrecoverable, -EINVAL on
  *         bad args, -ETIMEDOUT if the lock bound expired.
  *
+ * @satisfies SD-REQ-002
  * @satisfies SD-REQ-005
  * @satisfies SD-REQ-014
  * @satisfies SD-REQ-015
@@ -344,6 +349,7 @@ int safe_data_read(struct k_mutex *lock, void *payload, size_t len,
  * @return 0 on success, -EINVAL on bad args, -ETIMEDOUT if the lock bound
  *         expired.
  *
+ * @satisfies SD-REQ-002
  * @satisfies SD-REQ-006
  * @satisfies SD-REQ-018
  * @satisfies SD-REQ-014
@@ -373,6 +379,7 @@ int safe_data_write(struct k_mutex *lock, void *payload, size_t len,
  *         pre-check fails unrecoverably, -EINVAL on bad args, -ETIMEDOUT if
  *         the lock bound expired.
  *
+ * @satisfies SD-REQ-002
  * @satisfies SD-REQ-007
  * @satisfies SD-REQ-008
  * @satisfies SD-REQ-014
@@ -401,6 +408,7 @@ int safe_data_update(struct k_mutex *lock, void *payload, size_t len,
  * @return 0 on success, -EINVAL on bad args, -ETIMEDOUT if the lock bound
  *         expired.
  *
+ * @satisfies SD-REQ-002
  * @satisfies SD-REQ-022
  * @satisfies SD-REQ-014
  * @satisfies SD-REQ-015
