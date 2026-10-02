@@ -321,6 +321,9 @@ int safe_data_verify_repair(void *payload, size_t len, uint32_t crc,
  *         bad args, -ETIMEDOUT if the lock bound expired.
  *
  * @satisfies SD-REQ-005
+ * @satisfies SD-REQ-014
+ * @satisfies SD-REQ-015
+ * @satisfies SD-REQ-016
  */
 int safe_data_read(struct k_mutex *lock, void *payload, size_t len,
 		   uint32_t *crc, void *shadow, void *out);
@@ -343,6 +346,9 @@ int safe_data_read(struct k_mutex *lock, void *payload, size_t len,
  *
  * @satisfies SD-REQ-006
  * @satisfies SD-REQ-018
+ * @satisfies SD-REQ-014
+ * @satisfies SD-REQ-015
+ * @satisfies SD-REQ-016
  */
 int safe_data_write(struct k_mutex *lock, void *payload, size_t len,
 		    uint32_t *crc, void *shadow, const void *in);
@@ -369,6 +375,9 @@ int safe_data_write(struct k_mutex *lock, void *payload, size_t len,
  *
  * @satisfies SD-REQ-007
  * @satisfies SD-REQ-008
+ * @satisfies SD-REQ-014
+ * @satisfies SD-REQ-015
+ * @satisfies SD-REQ-016
  */
 int safe_data_update(struct k_mutex *lock, void *payload, size_t len,
 		     uint32_t *crc, void *shadow,
@@ -393,6 +402,9 @@ int safe_data_update(struct k_mutex *lock, void *payload, size_t len,
  *         expired.
  *
  * @satisfies SD-REQ-022
+ * @satisfies SD-REQ-014
+ * @satisfies SD-REQ-015
+ * @satisfies SD-REQ-016
  * @kconfig_depends{defined(CONFIG_SAFE_DATA_ALLOW_UNCHECKED_COMMIT)}
  */
 int safe_data_commit(struct k_mutex *lock, void *payload, size_t len,
@@ -627,6 +639,9 @@ static inline void z_safe_unlock(struct k_mutex *lock)
  * @param _pvar Name of the typed payload-pointer variable scoped to the block.
  *
  * @satisfies SD-REQ-021
+ * @satisfies SD-REQ-014
+ * @satisfies SD-REQ-015
+ * @satisfies SD-REQ-016
  * @kconfig_depends{defined(CONFIG_SAFE_DATA_GNU_EXTENSIONS)}
  */
 #if defined(CONFIG_SAFE_DATA_GNU_EXTENSIONS) || defined(__DOXYGEN__)
