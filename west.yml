@@ -31,13 +31,10 @@ manifest:
       west-commands: scripts/west-commands.yml
 
     # The documentation engine (a Zephyr module), public on GitHub. Pinned to a
-    # commit, not `main`: the generated documents depend on the engine's exact
-    # behaviour. 002682e is the head of the open pull-request stack #4-#9 on
-    # tiacsys/zdocs (branch tkaestner/6-coverage-adequacy). It carries the
-    # `doxygen_tag:` registry key, the API symbol needs, the Kconfig
-    # dependencies and the incremental-rebuild fixes that this repository uses.
-    # TODO: when #4-#9 are merged, re-pin to the merge commit on zdocs `main`.
+    # commit on zdocs `main`, not to the branch: the generated documents depend
+    # on the engine's exact behaviour. Bump it deliberately, together with a
+    # full docs build.
     - name: zdocs
       url: https://github.com/tiacsys/zdocs.git
-      revision: 002682eff73bc9a5f2b87559e3b212930f485404
+      revision: 47143a91ca9e186e31945b74eead490120d626c1
       path: tools/zdocs

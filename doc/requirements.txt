@@ -8,10 +8,8 @@
 #
 # Pinned to the versions that every docs build of this repository used
 # (r4 to r6, 2026-09 and 2026-10). zdocs pins its own engine set in
-# tools/zdocs/sphinx/requirements-doc.txt. For the engine packages, this
-# file differs only in sphinx-needs (8.3.0 here, 8.1.1 there), because the
-# toolbox was verified with 8.3.0. Change a version only together with a
-# full docs build.
+# tools/zdocs/sphinx/requirements-doc.txt; the engine packages here have the
+# same versions. Change a version only together with a full docs build.
 
 # Workspace and Zephyr module discovery (find_package(Zephyr) runs
 # zephyr_module.py, which validates module.yml files with jsonschema).
