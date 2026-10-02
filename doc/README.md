@@ -15,7 +15,7 @@ cross-document links from it.
 | Test Report (`test-report`) | twister output (`twister_report.xml`, `twister.json`) | one `TR-…` result per scenario × test case; `result_of` its test case, `covers` its requirements |
 | API Traceability (`api-traceability`) | the `@satisfies` in `include/safe_data/safe_data.h`, via `dox-safe-data-api` | one `IMPL-<symbol>` need per annotated API symbol; `satisfies` requirements |
 | API Reference (`dox-safe-data-api`) | `include/`, `src/`, `README.md` | Doxygen rendering of the API |
-| Test Sources (`dox-safe-data-testspec`) | `tests/safe_data/src/main.c` | Doxygen rendering of the annotated tests; its XML feeds the test specification |
+| Test Sources (`dox-safe-data-testspec`) | `tests/safe_data/src/main.c`, `tests/safe_data_fault/src/main.c` | Doxygen rendering of the annotated tests; its XML feeds the test specification |
 
 ## How the chain is built
 
@@ -53,8 +53,9 @@ cross-document links from it.
    `.. twisterinfo::` read the twister output directory and emit one
    `test_result` need per scenario × test case.
 5. **The API side.** Public functions and macros name the requirements they
-   implement with `@satisfies SD-REQ-…` in the header, only where the
-   requirement names the symbol. `.. symbolneeds::` in the API traceability
+   implement with `@satisfies SD-REQ-…` in the header. A requirement on the
+   whole API (argument validation, locking, fault reaction) is traced to each
+   public symbol that contains the behaviour. `.. symbolneeds::` in the API traceability
    turns each into an `impl` need linked `satisfies`, so a requirement shows
    "satisfied by" beside "verified by". A typo'd UID fails the build here too.
 6. **Kconfig dependencies.** `@kconfig_depends{CONFIG_…}` (one per condition)
@@ -63,7 +64,8 @@ cross-document links from it.
 7. **Traceability matrix.** `test-specification/traceability.rst` renders
    test case → requirement, the covered requirements, the **coverage gaps**,
    and the implementation half: symbol → requirement, the satisfied
-   requirements, and those left for a design-level trace.
+   requirements, and the requirements that no symbol satisfies. It needs no
+   twister run.
 
 ## Build
 
@@ -89,6 +91,11 @@ Useful cache options:
   `-DZDOCS_TWISTER_OUT=<workspace>/safety-toolbox/doc/_fixtures/twister`
   (see its `README.md`).
 - `-DZDOCS_DOC_BASE_URL=<url>`: the URL the deploy tree is served under.
+- `-DSAFE_DATA_DOC_TEST_REPORT=OFF`: leave the test report out, so no twister
+  run is needed. The build uses a copy of the registry without `test-report`
+  (written to `<build>/registry/documents.yaml`), so no other document links
+  to it. The CI workflow (`.github/workflows/docs.yml`) builds this way. The
+  default is `ON`.
 
 Useful targets:
 

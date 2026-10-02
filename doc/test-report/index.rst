@@ -31,8 +31,3 @@ Results: Safe Data Fault-Reaction Test Application
 
 .. testreport:: twister_report.xml
    :module: safe_data.fault
-
-.. toctree::
-   :hidden:
-
-   xref-test

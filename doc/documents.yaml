@@ -13,7 +13,7 @@ base_url: "http://localhost:8000/"
 doxygen_xml: true
 
 # doc-check asserts that every bullet on this page renders as a real link.
-xref_smoketest: "html/test-report/xref-test.html"
+xref_smoketest: "html/test-specification/xref-test.html"
 
 groups:
   - id: specification

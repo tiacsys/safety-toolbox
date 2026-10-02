@@ -15,3 +15,8 @@ Specification*) and status annotations.
    safe_data/test-spec
    safe_data_fault/test-spec
    traceability
+
+.. toctree::
+   :hidden:
+
+   xref-test
