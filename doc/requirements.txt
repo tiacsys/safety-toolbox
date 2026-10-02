@@ -1,0 +1,26 @@
+# Copyright (c) 2026 inovex GmbH
+# SPDX-License-Identifier: Apache-2.0
+#
+# Python packages for the documentation build (doc/), used by the CI workflow
+# (.github/workflows/docs.yml) and for a local build:
+#
+#   pip install -r safety-toolbox/doc/requirements.txt
+#
+# Pinned to the versions that every docs build of this repository used
+# (r4 to r6, 2026-09 and 2026-10). zdocs pins its own engine set in
+# tools/zdocs/sphinx/requirements-doc.txt. For the engine packages, this
+# file differs only in sphinx-needs (8.3.0 here, 8.1.1 there), because the
+# toolbox was verified with 8.3.0. Change a version only together with a
+# full docs build.
+
+# Workspace and Zephyr module discovery (find_package(Zephyr) runs
+# zephyr_module.py, which validates module.yml files with jsonschema).
+west==1.4.0
+jsonschema==4.26.0
+PyYAML==6.0.3
+
+# The zdocs engine.
+Sphinx==9.1.0
+sphinx_rtd_theme==3.1.0
+sphinx-needs==8.3.0
+sphinxcontrib-doxylink==1.13.0
