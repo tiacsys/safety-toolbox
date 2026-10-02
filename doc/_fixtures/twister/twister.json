@@ -1,10 +1,10 @@
 {
     "environment":{
         "os":"Linux",
-        "zephyr_version":"v4.4.0-13461-g77e25d8f3cb2",
+        "zephyr_version":"twister-cov-full-run",
         "toolchain":"zephyr/gnu",
         "commit_date":"2026-09-29T18:05:32+02:00",
-        "run_date":"2026-09-29T18:25:33+00:00",
+        "run_date":"2026-10-02T06:15:15+00:00",
         "options":{
             "help":null,
             "zephyr_base":null,
@@ -16,7 +16,7 @@
             "platform":[
                 "native_sim/native/64"
             ],
-            "outdir":"/wrk/z/ws-safety/twister-out-toolbox-r3"
+            "outdir":"/wrk/z/ws-safety/twister-out-toolbox-r5"
         }
     },
     "testsuites":[
@@ -25,13 +25,13 @@
             "arch":"posix",
             "platform":"native_sim/native/64",
             "path":"../safety-toolbox/tests/safe_data",
-            "run_id":"534600f3dc59c0495c131a42cc2576d9",
+            "run_id":"4b34f8fafdc9e589308188699e1ce58b",
             "runnable":true,
             "retries":0,
             "toolchain":"host/gnu",
             "status":"passed",
-            "execution_time":"0.06",
-            "build_time":"13.64",
+            "execution_time":"0.07",
+            "build_time":"7.63",
             "testcases":[
                 {
                     "identifier":"safe_data.api.safe_data.lock_timeout_is_bounded_and_reported",
@@ -67,6 +67,11 @@
                 },
                 {
                     "identifier":"safe_data.api.safe_data.concurrent_access_is_serialised",
+                    "execution_time":"0.00",
+                    "status":"passed"
+                },
+                {
+                    "identifier":"safe_data.api.safe_data.reduced_api_surface",
                     "execution_time":"0.00",
                     "status":"passed"
                 },
@@ -137,13 +142,13 @@
             "arch":"posix",
             "platform":"native_sim/native/64",
             "path":"../safety-toolbox/tests/safe_data",
-            "run_id":"015e384c604d56c5f17bc6a5f277c039",
+            "run_id":"578e9fe18de042cf89b238dd1b3add8a",
             "runnable":true,
             "retries":0,
             "toolchain":"host/gnu",
             "status":"passed",
-            "execution_time":"0.02",
-            "build_time":"13.60",
+            "execution_time":"0.03",
+            "build_time":"18.31",
             "testcases":[
                 {
                     "identifier":"safe_data.api.plain.safe_data.lock_timeout_is_bounded_and_reported",
@@ -179,6 +184,11 @@
                 },
                 {
                     "identifier":"safe_data.api.plain.safe_data.concurrent_access_is_serialised",
+                    "execution_time":"0.00",
+                    "status":"passed"
+                },
+                {
+                    "identifier":"safe_data.api.plain.safe_data.reduced_api_surface",
                     "execution_time":"0.00",
                     "status":"passed"
                 },
@@ -252,13 +262,13 @@
             "arch":"posix",
             "platform":"native_sim/native/64",
             "path":"../safety-toolbox/tests/safe_data",
-            "run_id":"e54e5b34f82c4173c254dd66f3882fe1",
+            "run_id":"65306176acf10a1f2c194ea30d64b502",
             "runnable":true,
             "retries":0,
             "toolchain":"host/gnu",
             "status":"passed",
             "execution_time":"0.02",
-            "build_time":"13.60",
+            "build_time":"18.24",
             "testcases":[
                 {
                     "identifier":"safe_data.api.timeout.safe_data.lock_timeout_is_bounded_and_reported",
@@ -293,6 +303,11 @@
                 },
                 {
                     "identifier":"safe_data.api.timeout.safe_data.concurrent_access_is_serialised",
+                    "execution_time":"0.00",
+                    "status":"passed"
+                },
+                {
+                    "identifier":"safe_data.api.timeout.safe_data.reduced_api_surface",
                     "execution_time":"0.00",
                     "status":"passed"
                 },
@@ -363,13 +378,13 @@
             "arch":"posix",
             "platform":"native_sim/native/64",
             "path":"../safety-toolbox/tests/safe_data",
-            "run_id":"1c3840f2cc5b1b2a4550035f55085775",
+            "run_id":"f4badd79d5290e933b51eca336e10ffc",
             "runnable":true,
             "retries":0,
             "toolchain":"host/gnu",
             "status":"passed",
-            "execution_time":"0.02",
-            "build_time":"13.61",
+            "execution_time":"0.03",
+            "build_time":"18.30",
             "testcases":[
                 {
                     "identifier":"safe_data.api.strict.safe_data.lock_timeout_is_bounded_and_reported",
@@ -404,6 +419,11 @@
                 },
                 {
                     "identifier":"safe_data.api.strict.safe_data.concurrent_access_is_serialised",
+                    "execution_time":"0.00",
+                    "status":"passed"
+                },
+                {
+                    "identifier":"safe_data.api.strict.safe_data.reduced_api_surface",
                     "execution_time":"0.00",
                     "status":"passed"
                 },
@@ -466,6 +486,81 @@
                 },
                 {
                     "identifier":"safe_data.api.strict.safe_data.init_and_verify",
+                    "execution_time":"0.00",
+                    "status":"passed"
+                }
+            ]
+        },
+        {
+            "name":"safe_data.fault.return",
+            "arch":"posix",
+            "platform":"native_sim/native/64",
+            "path":"../safety-toolbox/tests/safe_data_fault",
+            "run_id":"03439f2b3e2389ea03986a8b94e04b42",
+            "runnable":true,
+            "retries":0,
+            "toolchain":"host/gnu",
+            "status":"passed",
+            "execution_time":"0.01",
+            "build_time":"18.62",
+            "testcases":[
+                {
+                    "identifier":"safe_data.fault.return.safe_data_fault.lock_from_isr_asserts",
+                    "execution_time":"0.00",
+                    "status":"passed"
+                },
+                {
+                    "identifier":"safe_data.fault.return.safe_data_fault.fault_reaction",
+                    "execution_time":"0.00",
+                    "status":"passed"
+                }
+            ]
+        },
+        {
+            "name":"safe_data.fault.handler",
+            "arch":"posix",
+            "platform":"native_sim/native/64",
+            "path":"../safety-toolbox/tests/safe_data_fault",
+            "run_id":"4715986efcd5bffa5b31ae49149a49ce",
+            "runnable":true,
+            "retries":0,
+            "toolchain":"host/gnu",
+            "status":"passed",
+            "execution_time":"0.02",
+            "build_time":"18.51",
+            "testcases":[
+                {
+                    "identifier":"safe_data.fault.handler.safe_data_fault.lock_from_isr_asserts",
+                    "execution_time":"0.00",
+                    "status":"passed"
+                },
+                {
+                    "identifier":"safe_data.fault.handler.safe_data_fault.fault_reaction",
+                    "execution_time":"0.00",
+                    "status":"passed"
+                }
+            ]
+        },
+        {
+            "name":"safe_data.fault.panic",
+            "arch":"posix",
+            "platform":"native_sim/native/64",
+            "path":"../safety-toolbox/tests/safe_data_fault",
+            "run_id":"edd54e3727b70ed872974ea4c5b812b6",
+            "runnable":true,
+            "retries":0,
+            "toolchain":"host/gnu",
+            "status":"passed",
+            "execution_time":"0.01",
+            "build_time":"18.13",
+            "testcases":[
+                {
+                    "identifier":"safe_data.fault.panic.safe_data_fault.lock_from_isr_asserts",
+                    "execution_time":"0.00",
+                    "status":"passed"
+                },
+                {
+                    "identifier":"safe_data.fault.panic.safe_data_fault.fault_reaction",
                     "execution_time":"0.00",
                     "status":"passed"
                 }

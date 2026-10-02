@@ -9,16 +9,20 @@ left out. The "Execution Logs" section of the report therefore shows
 
 ## Provenance
 
-- Run date: 2026-09-29T20:25:54+02:00
+- Run date: 2026-10-02T08:15:42+02:00
 - Command (cwd = workspace root):
-  `west twister -T safety-toolbox/tests -p native_sim/native/64 -O twister-out-toolbox-r3`
+  `west twister -T safety-toolbox/tests -p native_sim/native/64 -O twister-out-toolbox-r5`
 - Platform: `native_sim/native/64`
 - Scenarios: `safe_data.api`, `safe_data.api.plain`, `safe_data.api.timeout`,
-  `safe_data.api.strict`
-- Result: 65 passed, 11 skipped, 0 failed (76 test case results)
-- safety-toolbox: `5847f3fdca777b8d62615d84b8926fdc8ce125ed`
-- Zephyr: `77e25d8f3cb2e94adb5a44426b98e088f1bef3fe` (`v4.4.0-13461-g77e25d8f3cb2`).
-  The standalone `west.yml` pins upstream v4.4.1; the results are identical there.
+  `safe_data.api.strict` (tests/safe_data, 20 tests each) and
+  `safe_data.fault.return`, `safe_data.fault.handler`, `safe_data.fault.panic`
+  (tests/safe_data_fault, 2 tests each)
+- Result: 75 passed, 11 skipped, 0 failed (86 test case results)
+- safety-toolbox: `4cea72e00a3c7d6fd1b1e1b371e9fc42a7768ce4`
+- Zephyr: `77e25d8f3cb2e94adb5a44426b98e088f1bef3fe` (`v4.4.0-13461-g77e25d8f3cb`).
+  `twister.json` names another local tag on the same commit as its
+  `zephyr_version`. This run was not repeated against the upstream v4.4.1 that
+  the standalone `west.yml` pins.
 
 ## Use
 
