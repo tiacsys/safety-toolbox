@@ -36,6 +36,7 @@ samples/producer_consumer       two threads share one struct; lock prevents torn
 tests/safe_data                 ztest suite (incl. a concurrency test)
 tests/safe_data_fault           fault-reaction and ISR-misuse tests
 doc/                            requirements, test specification, test report
+affirmatrix.yaml                evidence case configuration (see below)
 .github/workflows/docs.yml      CI: build the documentation, publish to Pages
 west.yml                        standalone workspace manifest
 ```
@@ -200,6 +201,33 @@ Add the repository to your own manifest, or pass it on the command line:
 ```sh
 west build -b <board> <app> -- -DEXTRA_ZEPHYR_MODULES=<path to safety-toolbox>
 ```
+
+## Evidence case configuration (`affirmatrix.yaml`)
+
+`affirmatrix.yaml` configures the affirmatrix evidence-graph tool for this
+repository. affirmatrix builds a hash-anchored graph from requirement to API
+symbol, test case and test outcome, and seals an evidence package over it.
+The file holds invocation parameters only. Nothing in it enters a hash, and
+relative paths resolve against the file.
+
+- `case: ./case` is the case lineage: a nested git worktree on the orphan
+  branch `case`. It holds the graph records, the review events and the
+  sealed packages. Each commit there is a store act of the case owner. The
+  branch stays local: it is not pushed, and `.gitignore` ignores `/case/`.
+- `implementation: toolbox` names this checkout as the implementation, and
+  `repositories:` names this checkout as `toolbox`.
+- The `export:` and `doxygen:` paths under `producer:` point at a documentation
+  build of this commit, in a directory beside the repository
+  (`../bdoc-toolbox-r6/deploy/`): the `needs.json` exports of the
+  requirement specification, the API traceability and the test specification,
+  and the Doxygen XML of the API and the test sources. To use the file, build
+  the documentation (see `doc/README.md`) into such a directory, or change the
+  paths.
+- No test run is named in the file. affirmatrix takes a twister run as a
+  bundle on its command line.
+
+Nothing in the module build, the tests or the documentation build reads this
+file.
 
 ## Limitations / notes
 
