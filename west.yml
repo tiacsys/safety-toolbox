@@ -3,7 +3,7 @@
 #
 # Standalone west manifest for the safe_data module and its documentation.
 #
-#   west init -m git@github.com:tiacsys/safety-toolbox.git toolbox-ws
+#   west init -m https://github.com/tiacsys/safety-toolbox.git toolbox-ws
 #   cd toolbox-ws && west update
 #
 # The workspace then holds exactly three projects: this repository, Zephyr and the
@@ -30,16 +30,14 @@ manifest:
       revision: v4.4.1
       west-commands: scripts/west-commands.yml
 
-    # The documentation engine (a Zephyr module). SSH, because the repository
-    # is not anonymously readable. Pinned to a commit, not `main`: the
-    # generated test report and traceability matrix depend on the engine's
-    # exact behaviour. This commit carries the `doxygen_tag:` registry key
-    # (f735c41) and its parser fix (9a25655), the ZEPHYR_BASE forwarding fix
-    # (7554422), and the incremental-rebuild fixes for the test report and
-    # the test specification (967d417, 4da0074, 7a3f37c), and the API symbol
-    # needs and Kconfig dependencies (aaa2d98, f6f282a). It resolves on
-    # GitHub once zdocs is pushed.
+    # The documentation engine (a Zephyr module), public on GitHub. Pinned to a
+    # commit, not `main`: the generated documents depend on the engine's exact
+    # behaviour. 002682e is the head of the open pull-request stack #4-#9 on
+    # tiacsys/zdocs (branch tkaestner/6-coverage-adequacy). It carries the
+    # `doxygen_tag:` registry key, the API symbol needs, the Kconfig
+    # dependencies and the incremental-rebuild fixes that this repository uses.
+    # TODO: when #4-#9 are merged, re-pin to the merge commit on zdocs `main`.
     - name: zdocs
-      url: git@github.com:tiacsys/zdocs.git
-      revision: f6f282a1442cec15f2f66002134a008b84399785
+      url: https://github.com/tiacsys/zdocs.git
+      revision: 002682eff73bc9a5f2b87559e3b212930f485404
       path: tools/zdocs

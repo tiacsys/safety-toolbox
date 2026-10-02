@@ -147,7 +147,7 @@ The repository is its own west manifest (`west.yml`): Zephyr at a
 release tag plus the zdocs documentation engine, nothing else.
 
 ```sh
-west init -m git@github.com:tiacsys/safety-toolbox.git toolbox-ws
+west init -m https://github.com/tiacsys/safety-toolbox.git toolbox-ws
 cd toolbox-ws
 west update
 west zephyr-export
