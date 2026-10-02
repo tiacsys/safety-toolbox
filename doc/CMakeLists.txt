@@ -1,4 +1,4 @@
-# Copyright (c) 2026 inovex GmbH
+# Copyright (c) 2026 The safety-toolbox contributors
 # SPDX-License-Identifier: Apache-2.0
 #
 # Safe Data API documentation, built by the zdocs engine. Every document is

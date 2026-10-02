@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2026 inovex GmbH
+# Copyright (c) 2026 The safety-toolbox contributors
 # SPDX-License-Identifier: Apache-2.0
 """Write a copy of the document registry without some documents.
 

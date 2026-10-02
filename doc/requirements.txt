@@ -1,4 +1,4 @@
-# Copyright (c) 2026 inovex GmbH
+# Copyright (c) 2026 The safety-toolbox contributors
 # SPDX-License-Identifier: Apache-2.0
 #
 # Python packages for the documentation build (doc/), used by the CI workflow

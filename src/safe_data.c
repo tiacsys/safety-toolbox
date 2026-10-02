@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026
+ * Copyright (c) 2026 The safety-toolbox contributors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Type-erased core for the Safe Data API. All the integrity logic (CRC choice,

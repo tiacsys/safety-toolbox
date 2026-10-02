@@ -1,4 +1,4 @@
-# Copyright (c) 2026 inovex GmbH
+# Copyright (c) 2026 The safety-toolbox contributors
 # SPDX-License-Identifier: Apache-2.0
 #
 # Sphinx configuration shim: the zdocs engine provides the shared
@@ -15,6 +15,6 @@ configure(
     globals(),
     doc_dir=Path(__file__).resolve().parent,
     project="Safe Data API — API Traceability",
-    author="Safe Data API contributors",
-    copyright_holder="Safe Data API contributors",
+    author="The safety-toolbox contributors",
+    copyright_holder="The safety-toolbox contributors",
 )

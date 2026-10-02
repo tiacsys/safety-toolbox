@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026
+ * Copyright (c) 2026 The safety-toolbox contributors
  * SPDX-License-Identifier: Apache-2.0
  *
  * producer_consumer - two threads sharing one protected struct.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026
+ * Copyright (c) 2026 The safety-toolbox contributors
  * SPDX-License-Identifier: Apache-2.0
  *
  * Fault-reaction and misuse tests for the Safe Data API. Each scenario in
