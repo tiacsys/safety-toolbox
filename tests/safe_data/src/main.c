@@ -759,8 +759,9 @@ static void holder_fn(void *a, void *b, void *c)
 /**
  * @brief Blocked access fails within the lock bound
  *
- * While another thread holds the container lock, an access fails with
- * -ETIMEDOUT within CONFIG_SAFE_DATA_LOCK_TIMEOUT_MS and the timeout is
+ * While another thread holds the container lock, every locked operation
+ * (read, write, update, and commit and SAFE_SECTION where configured) fails
+ * with -ETIMEDOUT within CONFIG_SAFE_DATA_LOCK_TIMEOUT_MS and each timeout is
  * counted; the container is usable again after the holder releases.
  *
  * @testid{TC_SAFE_DATA_LOCK_TIMEOUT_IS_BOUNDED_AND_REPORTED}
@@ -773,27 +774,61 @@ ZTEST(safe_data, test_lock_timeout_is_bounded_and_reported)
 {
 #if CONFIG_SAFE_DATA_LOCK_TIMEOUT_MS > 0 && defined(CONFIG_SAFE_DATA_LOCKING)
 	struct payload out;
+	struct payload in = { .a = 2, .b = 2, .c = 2 };
+	uint32_t delta = 1;
+	uint32_t blocked = 0;
+#if defined(CONFIG_SAFE_DATA_STATS)
+	struct safe_data_stats before;
+	struct safe_data_stats after;
+#endif
 
 	reset_to(1, 1, 1);
+#if defined(CONFIG_SAFE_DATA_STATS)
+	zassert_ok(safe_data_stats_get(&before));
+#endif
 
 	k_thread_create(&holder_thread, holder_stack,
 			K_THREAD_STACK_SIZEOF(holder_stack), holder_fn,
 			NULL, NULL, NULL, 5, 0, K_NO_WAIT);
-	/* Let the holder take the container lock. */
+	/* Let the holder take the container lock. It keeps the lock for ten
+	 * bounds; the blocked operations below use one bound each.
+	 */
 	k_sleep(K_MSEC(CONFIG_SAFE_DATA_LOCK_TIMEOUT_MS));
 
 	zassert_equal(SAFE_READ(&sp, &out), -ETIMEDOUT,
-		      "blocked access must fail within the configured bound");
-
-#if defined(CONFIG_SAFE_DATA_STATS)
+		      "blocked read must fail within the configured bound");
+	blocked++;
+	zassert_equal(SAFE_WRITE(&sp, &in), -ETIMEDOUT,
+		      "blocked write must fail within the configured bound");
+	blocked++;
+	zassert_equal(SAFE_UPDATE(&sp, mut_add, &delta), -ETIMEDOUT,
+		      "blocked update must fail within the configured bound");
+	blocked++;
+#if defined(CONFIG_SAFE_DATA_ALLOW_UNCHECKED_COMMIT)
+	zassert_equal(SAFE_COMMIT(&sp), -ETIMEDOUT,
+		      "blocked commit must fail within the configured bound");
+	blocked++;
+#endif
+#if defined(CONFIG_SAFE_DATA_GNU_EXTENSIONS)
 	{
-		struct safe_data_stats st;
+		bool entered = false;
 
-		zassert_ok(safe_data_stats_get(&st));
-		zassert_true(st.lock_timeouts >= 1,
-			     "the timeout must be observable");
+		SAFE_SECTION(&sp, p) {
+			entered = true;
+			p->a = 0;
+		}
+		zassert_false(entered,
+			      "a blocked SAFE_SECTION must skip its block");
+		blocked++;
 	}
 #endif
+
+#if defined(CONFIG_SAFE_DATA_STATS)
+	zassert_ok(safe_data_stats_get(&after));
+	zassert_equal(after.lock_timeouts - before.lock_timeouts, blocked,
+		      "each timeout must be observable");
+#endif
+	ARG_UNUSED(blocked);
 
 	zassert_ok(k_thread_join(&holder_thread, K_FOREVER));
 	zassert_ok(SAFE_READ(&sp, &out), "container must be usable again");
