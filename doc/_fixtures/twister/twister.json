@@ -1,7 +1,7 @@
 {
     "environment":{
         "os":"Linux",
-        "zephyr_version":"twister-cov-full-run",
+        "zephyr_version":"v4.4.0-13461-g77e25d8f3cb",
         "toolchain":"zephyr/gnu",
         "commit_date":"2026-09-29T18:05:32+02:00",
         "run_date":"2026-10-02T06:15:15+00:00",
@@ -16,7 +16,7 @@
             "platform":[
                 "native_sim/native/64"
             ],
-            "outdir":"/wrk/z/ws-safety/twister-out-toolbox-r5"
+            "outdir":"twister-out"
         }
     },
     "testsuites":[

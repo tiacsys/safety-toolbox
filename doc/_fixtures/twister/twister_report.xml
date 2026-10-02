@@ -1,7 +1,7 @@
 <testsuites>
 	<testsuite name="native_sim/native/64" timestamp="2026-10-02T08:15:15.939757" time="0.19000000000000003" tests="86" failures="0" errors="0" skipped="11">
 		<properties>
-			<property name="version" value="twister-cov-full-run" />
+			<property name="version" value="v4.4.0-13461-g77e25d8f3cb" />
 		</properties>
 		<testcase classname="safe_data.api" name="safe_data.api.safe_data.lock_timeout_is_bounded_and_reported" time="0">
 			<skipped type="skipped" message="ztest skip" />

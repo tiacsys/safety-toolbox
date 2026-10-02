@@ -20,9 +20,14 @@ left out. The "Execution Logs" section of the report therefore shows
 - Result: 75 passed, 11 skipped, 0 failed (86 test case results)
 - safety-toolbox: `4cea72e00a3c7d6fd1b1e1b371e9fc42a7768ce4`
 - Zephyr: `77e25d8f3cb2e94adb5a44426b98e088f1bef3fe` (`v4.4.0-13461-g77e25d8f3cb`).
-  `twister.json` names another local tag on the same commit as its
-  `zephyr_version`. This run was not repeated against the upstream v4.4.1 that
-  the standalone `west.yml` pins.
+  This run was not repeated against the upstream v4.4.1 that the standalone
+  `west.yml` pins.
+- Edited after the run (2026-10-02), so the published files name no local
+  machine details: `environment.zephyr_version` in `twister.json` and the
+  `version` property in `twister_report.xml` held a local tag name and are
+  now `v4.4.0-13461-g77e25d8f3cb`; `environment.options.outdir` held the
+  absolute output path and is now `twister-out`. The test results are
+  unchanged.
 
 ## Use
 
@@ -35,7 +40,9 @@ cmake -S <workspace>/safety-toolbox/doc -B build/doc \
 
 Rerun twister, copy `twister.json` and `twister_report.xml` from the new
 output directory over the two files here (`cp -p`), and update the date,
-command and commit SHAs in this file.
+command and commit SHAs in this file. Then replace the machine details as
+described under "Provenance": `outdir` becomes `twister-out`, and the Zephyr
+version becomes the `git describe` of the Zephyr commit (`v4.4.0-…`).
 
 Warning: a fixture is a snapshot. A live `west twister` run is the real
 evidence.
