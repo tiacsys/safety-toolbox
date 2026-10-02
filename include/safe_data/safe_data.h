@@ -413,6 +413,7 @@ int safe_data_update(struct k_mutex *lock, void *payload, size_t len,
  * @satisfies SD-REQ-014
  * @satisfies SD-REQ-015
  * @satisfies SD-REQ-016
+ * @satisfies SD-REQ-020
  * @kconfig_depends{defined(CONFIG_SAFE_DATA_ALLOW_UNCHECKED_COMMIT)}
  */
 int safe_data_commit(struct k_mutex *lock, void *payload, size_t len,
@@ -605,6 +606,7 @@ static inline void z_safe_unlock(struct k_mutex *lock)
  * @param _c Pointer to a container declared with SAFE_CONTAINER_DEFINE().
  * @return As safe_data_commit().
  *
+ * @satisfies SD-REQ-020
  * @kconfig_depends{defined(CONFIG_SAFE_DATA_ALLOW_UNCHECKED_COMMIT)}
  */
 #define SAFE_COMMIT(_c)                                                        \
@@ -650,6 +652,7 @@ static inline void z_safe_unlock(struct k_mutex *lock)
  * @satisfies SD-REQ-014
  * @satisfies SD-REQ-015
  * @satisfies SD-REQ-016
+ * @satisfies SD-REQ-020
  * @kconfig_depends{defined(CONFIG_SAFE_DATA_GNU_EXTENSIONS)}
  */
 #if defined(CONFIG_SAFE_DATA_GNU_EXTENSIONS) || defined(__DOXYGEN__)

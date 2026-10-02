@@ -457,6 +457,59 @@ ZTEST(safe_data, test_null_args)
 	zassert_ok(safe_data_verify(buf, n, crc, NULL));
 }
 
+#if !defined(CONFIG_SAFE_DATA_ALLOW_UNCHECKED_COMMIT)
+/* The header has no prototype here. A weak reference resolves to NULL when
+ * the image links no definition, so the test can show that the function is
+ * not part of the build without a use that fails to compile.
+ */
+extern int safe_data_commit(struct k_mutex *lock, void *payload, size_t len,
+			    uint32_t *crc, void *shadow) __attribute__((weak));
+#endif
+
+/**
+ * @brief Optional API surface matches the configuration
+ *
+ * SAFE_COMMIT and safe_data_commit() exist only with
+ * CONFIG_SAFE_DATA_ALLOW_UNCHECKED_COMMIT, and SAFE_SECTION only with
+ * CONFIG_SAFE_DATA_GNU_EXTENSIONS. Where an option is disabled, the macro is
+ * not defined and the image links no safe_data_commit(), so a use fails at
+ * build time. At the Strict level both are absent.
+ *
+ * @testid{TC_SAFE_DATA_REDUCED_API_SURFACE}
+ * @verifies SD-REQ-020
+ * @active
+ */
+ZTEST(safe_data, test_reduced_api_surface)
+{
+	int (*volatile commit_fn)(struct k_mutex *, void *, size_t, uint32_t *,
+				  void *) = safe_data_commit;
+#if defined(SAFE_COMMIT)
+	const bool commit_macro = true;
+#else
+	const bool commit_macro = false;
+#endif
+#if defined(SAFE_SECTION)
+	const bool section_macro = true;
+#else
+	const bool section_macro = false;
+#endif
+	const bool commit_cfg = IS_ENABLED(CONFIG_SAFE_DATA_ALLOW_UNCHECKED_COMMIT);
+	const bool section_cfg = IS_ENABLED(CONFIG_SAFE_DATA_GNU_EXTENSIONS);
+
+	zassert_equal(commit_macro, commit_cfg,
+		      "SAFE_COMMIT must exist exactly when it is configured");
+	zassert_equal(commit_fn != NULL, commit_cfg,
+		      "safe_data_commit() must be linked exactly when configured");
+	zassert_equal(section_macro, section_cfg,
+		      "SAFE_SECTION must exist exactly when it is configured");
+
+	if (IS_ENABLED(CONFIG_SAFE_DATA_LEVEL_STRICT)) {
+		zassert_false(commit_macro, "Strict: no SAFE_COMMIT");
+		zassert_is_null(commit_fn, "Strict: no safe_data_commit()");
+		zassert_false(section_macro, "Strict: no SAFE_SECTION");
+	}
+}
+
 /* ----------------------------------------------------------------------- *
  * Concurrency: two threads share one container. The mutex inside the
  * container must serialise the producer's read-modify-write against the
