@@ -1,0 +1,136 @@
+# Copyright (c) 2026 inovex GmbH
+# SPDX-License-Identifier: Apache-2.0
+#
+# Builds the documentation with zdocs and publishes it to GitHub Pages
+# (https://tiacsys.github.io/safety-toolbox/).
+#
+# - Pull request: build and doc-check only.
+# - Push to main, or a manual run on main: build, doc-check, deploy.
+#
+# The test report is left out (-DSAFE_DATA_DOC_TEST_REPORT=OFF): it needs a
+# twister run, and CI does not run twister yet. The requirement and test
+# specifications, the API traceability, the traceability matrix and the two
+# Doxygen documents need no run.
+#
+# One-time repository setting: Settings > Pages > Source = "GitHub Actions".
+
+name: Documentation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Native \verifies and \satisfies need Doxygen >= 1.16. Ubuntu has older
+  # packages, so the job uses the official release binary, checked by hash.
+  DOXYGEN_VERSION: "1.16.1"
+  DOXYGEN_SHA256: "a56f885d37e3aae08a99f638d17bbb381224c03a878d9e2dda4f9fa4baf1d8bd"
+
+jobs:
+  build:
+    name: Build documentation
+    runs-on: ubuntu-24.04
+    steps:
+      # The west workspace is the job's work directory: this repository is
+      # the manifest at safety-toolbox/, west.yml adds zephyr/ and tools/zdocs/.
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: safety-toolbox
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: safety-toolbox/doc/requirements.txt
+
+      - name: Install Python packages
+        run: python -m pip install -r safety-toolbox/doc/requirements.txt
+
+      - name: Restore Doxygen
+        id: doxygen-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/doxygen
+          key: doxygen-${{ env.DOXYGEN_VERSION }}-${{ env.DOXYGEN_SHA256 }}
+
+      - name: Download Doxygen
+        if: steps.doxygen-cache.outputs.cache-hit != 'true'
+        run: |
+          tag="Release_${DOXYGEN_VERSION//./_}"
+          curl -sSfL -o doxygen.tar.gz \
+            "https://github.com/doxygen/doxygen/releases/download/${tag}/doxygen-${DOXYGEN_VERSION}.linux.bin.tar.gz"
+          echo "${DOXYGEN_SHA256}  doxygen.tar.gz" | sha256sum --check --strict
+          mkdir -p ~/doxygen
+          tar -xzf doxygen.tar.gz -C ~/doxygen --strip-components=1
+          rm doxygen.tar.gz
+
+      - name: Put Doxygen on the path
+        run: echo "${HOME}/doxygen/bin" >> "${GITHUB_PATH}"
+
+      - name: Show tool versions
+        run: |
+          doxygen --version
+          cmake --version | head -n 1
+          python --version
+          west --version
+
+      # Zephyr is needed only as a CMake package (find_package(Zephyr
+      # COMPONENTS doc)): no toolchain, no SDK. A narrow, shallow update
+      # fetches only the two pinned projects at depth 1.
+      - name: Set up the west workspace
+        run: |
+          west init -l safety-toolbox
+          west update --narrow --fetch-opt=--depth=1
+          west list
+
+      - name: Configure
+        run: cmake -S safety-toolbox/doc -B build/doc -DSAFE_DATA_DOC_TEST_REPORT=OFF
+
+      # Stage two of the build is all-or-nothing, so the stage-one indexes
+      # of every document come first.
+      - name: Build the documents
+        run: |
+          cmake --build build/doc --target doc-index
+          cmake --build build/doc --target all-docs
+
+      - name: Check cross-document links
+        run: cmake --build build/doc --target doc-check
+
+      - name: Add the landing page
+        run: cp safety-toolbox/doc/site/index.html build/doc/deploy/html/index.html
+
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: build/doc/deploy/html
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
