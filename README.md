@@ -8,7 +8,8 @@ call the right function at the right time.
 The repository is also a self-contained example of generated, auditable safety
 evidence. Its requirements, annotated tests and twister results are rendered
 into a requirement specification, a test specification, a test report and a
-traceability matrix (see `doc/README.md`).
+traceability matrix (see `doc/README.md`). The published documentation (without
+the test report for now) is at <https://tiacsys.github.io/safety-toolbox/>.
 
 ## Why
 
@@ -33,7 +34,9 @@ samples/config_guard            copy-in/out style; corruption -> recover default
 samples/transaction             atomic RMW, scoped section, shadow recovery
 samples/producer_consumer       two threads share one struct; lock prevents torn reads
 tests/safe_data                 ztest suite (incl. a concurrency test)
+tests/safe_data_fault           fault-reaction and ISR-misuse tests
 doc/                            requirements, test specification, test report
+.github/workflows/docs.yml      CI: build the documentation, publish to Pages
 west.yml                        standalone workspace manifest
 ```
 
@@ -176,8 +179,10 @@ build/producer_consumer/zephyr/zephyr.exe    # Ctrl-C to stop (idles after main)
 
 ## Tests
 
-The ztest suite has four twister scenarios (default, detection-only without
-the shadow copy, bounded locking, and the STRICT preset):
+Two test applications, seven twister scenarios. `tests/safe_data` runs in four
+(default, detection-only without the shadow copy, bounded locking, and the
+STRICT preset). `tests/safe_data_fault` runs in three, one per
+unrecoverable-fault reaction (return, handler, panic):
 
 ```sh
 west twister -T safety-toolbox/tests -p native_sim -O twister-out
