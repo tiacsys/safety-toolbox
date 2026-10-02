@@ -174,6 +174,8 @@ int safe_data_fault_handler_register(safe_data_fault_cb_t cb);
  *
  * @param payload Pointer to the payload whose integrity check failed.
  * @param len     Payload size in bytes.
+ *
+ * @satisfies SD-REQ-011
  */
 void safe_data_fault_handler(const void *payload, size_t len);
 
@@ -280,6 +282,7 @@ int safe_data_init(struct k_mutex *lock, void *payload, size_t len,
  *
  * @satisfies SD-REQ-002
  * @satisfies SD-REQ-003
+ * @satisfies SD-REQ-011
  */
 int safe_data_verify(const void *payload, size_t len, uint32_t crc,
 		     const void *shadow);
@@ -305,6 +308,7 @@ int safe_data_verify(const void *payload, size_t len, uint32_t crc,
  * @satisfies SD-REQ-004
  * @satisfies SD-REQ-009
  * @satisfies SD-REQ-010
+ * @satisfies SD-REQ-011
  */
 int safe_data_verify_repair(void *payload, size_t len, uint32_t crc,
 			    void *shadow);
