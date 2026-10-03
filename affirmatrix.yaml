@@ -1,0 +1,36 @@
+# affirmatrix configuration for the safety-toolbox evidence case.
+#
+# Invocation parameters only: where the case lineage lives and where the
+# readers find this repository's exports and its test run. Nothing here
+# enters a hash. Relative paths resolve against this file. The readers
+# anchor every hash at a path relative to the named repository.
+
+case: ./case
+
+repositories:
+  # This checkout: requirements, implementations and test specifications.
+  toolbox: .
+  # The twister run made from this checkout at the same commit, with its
+  # record files (toolbox.sha, toolbox.dirty, zephyr.sha, zephyr.dirty,
+  # zdocs.sha, command.txt, run.name) beside the output.
+  results: ../twister-out-toolbox-r4
+
+producer:
+  repository: toolbox
+  # The clean documentation build of this checkout at the same commit
+  # (exports are reproducible; a build carrying a timestamp is refused).
+  requirements:
+    export: ../bdoc-toolbox-r4/deploy/html/requirement-specification/needs.json
+    types: [top_requirement, requirement]
+    source: doc/requirement-specification
+  implementations:
+    export: ../bdoc-toolbox-r4/deploy/html/api-traceability/needs.json
+    doxygen: ../bdoc-toolbox-r4/deploy/xml/dox-safe-data-api
+  specifications:
+    export: ../bdoc-toolbox-r4/deploy/html/test-specification/needs.json
+    doxygen: ../bdoc-toolbox-r4/deploy/xml/dox-safe-data-testspec
+  outcomes:
+    - artifact: ../twister-out-toolbox-r4/twister.json
+      revision: ../twister-out-toolbox-r4/toolbox.sha
+      name: ../twister-out-toolbox-r4/run.name
+      repository: results

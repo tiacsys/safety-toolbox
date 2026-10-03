@@ -5,3 +5,6 @@ __pycache__/
 # Build and test output
 build*/
 twister-out*/
+
+# affirmatrix case lineage: a nested git worktree on the orphan branch `case`
+/case/
